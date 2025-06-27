@@ -94,19 +94,19 @@ namespace API.Controllers
 
             await _context.AddAsync(data);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetData", new { }, data);
+            return data;
         }
 
         [Authorize]
         [HttpPost]
         [Route("PostDataList")]
-        public async Task<ActionResult<T>> PostDataList(List<T> data)
+        public async Task<ActionResult<List<T>>> PostDataList(List<T> data)
         {
 
             await _context.AddRangeAsync(data);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetData", new { }, data);
+            return data;
         }
 
         // DELETE: api/Cities/5

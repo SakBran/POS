@@ -10,16 +10,23 @@ import {
   Form,
   Grid,
   Input,
+  Modal,
   Pagination,
   Row,
   Select,
+  Space,
+  Tooltip,
   Typography,
 } from 'antd';
 
 import NameConvert from '../../../services/NameConvert';
 import { PaginationType } from '../../../types/PaginationType';
-import { FileExcelOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
+import { BasicTable } from './BasicTable';
+import { Get } from '../../../services/BasicHttpServices';
+import Html5DectorModal from '../BarcodeDector/Html5Dector';
+import { ToastContainer, toast } from 'react-toastify';
 
 const { useBreakpoint } = Grid;
 
@@ -36,7 +43,7 @@ interface PropsType {
   actionComponent?: React.FC<{ id: string }>; // add this props for userTableAction
 }
 
-export const BasicTable: React.FC<PropsType> = ({
+export const NewsaleTable: React.FC<PropsType> = ({
   displayData,
   api,
   fetch,
@@ -123,7 +130,30 @@ export const BasicTable: React.FC<PropsType> = ({
     XLSX.writeFile(wb, 'Report.xlsx');
   };
 
+  const actionForModal = (id: any) => {
+    const { id: dataId } = id;
+    const onClick = (e: any) => {
+      e.preventDefault();
+      // await toast.promise(axios.get('/api/users/42'), {
+      //   pending: 'Loading user…',
+      //   success: (res) => `Loaded user ${res.data.name}`,
+      //   error: 'Couldn’t load user!',
+      // });
+      toast.success(`The object id is ${dataId}`);
+    };
+    return (
+      <a onClick={onClick}>
+        <Space>Add</Space>
+      </a>
+    );
+  };
+
   const { Option } = Select;
+
+  //For Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenForBarcode, setIsModalOpenForBarcode] = useState(false);
+  const [isQuantityModalOpen, setisQuantityModalOpen] = useState(false);
 
   return (
     <>
@@ -188,7 +218,6 @@ export const BasicTable: React.FC<PropsType> = ({
 
       <br />
 
-      {/* ... (rest of your table component JSX) */}
       <div className="container">
         <Flex
           justify="space-between"
@@ -198,16 +227,29 @@ export const BasicTable: React.FC<PropsType> = ({
           <Typography.Title level={5} style={{ margin: 0 }}>
             Table
           </Typography.Title>
-
-          <Button
-            type="primary"
-            onClick={() => {
-              exportToExcel();
-            }}
-          >
-            <FileExcelOutlined />
-            Excel
-          </Button>
+          <div>
+            <Space>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
+              >
+                <PlusCircleOutlined />
+                Add Products
+              </Button>
+              <Button
+                style={{ margin: '50 px' }}
+                type="primary"
+                onClick={() => {
+                  setIsModalOpenForBarcode(true);
+                }}
+              >
+                <PlusCircleOutlined />
+                Add Products With Barcode/QR
+              </Button>
+            </Space>
+          </div>
         </Flex>
 
         <div className="table-container">
@@ -236,9 +278,31 @@ export const BasicTable: React.FC<PropsType> = ({
               <tbody>
                 {data.data?.map((row, index) => {
                   const dataCells = displayData.map((display: string, i) => {
-                    if (display !== 'id') {
+                    if (display !== 'id' && display !== 'quantity') {
                       const cellValue = row[display];
                       return <td key={i}>{cellValue?.toString() ?? 'N/A'}</td>;
+                    } else if (display === 'quantity') {
+                      const cellValue = row[display];
+                      return (
+                        <Tooltip
+                          placement="topLeft"
+                          title="Click to fix quantity"
+                        >
+                          <td
+                            key={i}
+                            onClick={() => setisQuantityModalOpen(true)}
+                          >
+                            <Typography.Link
+                              strong
+                              style={{
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {cellValue?.toString() ?? 'N/A'}
+                            </Typography.Link>
+                          </td>
+                        </Tooltip>
+                      );
                     } else {
                       return null;
                     }
@@ -262,6 +326,23 @@ export const BasicTable: React.FC<PropsType> = ({
                     </tr>
                   );
                 })}
+                <tr>
+                  <td colSpan={3}>
+                    <Typography.Text
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignContent: 'center',
+                      }}
+                    >
+                      {' '}
+                      Total
+                    </Typography.Text>
+                  </td>
+                  <td>10</td>
+                  <td>100</td>
+                  <td></td>
+                </tr>
               </tbody>
             )}
             {loading && (
@@ -333,6 +414,80 @@ export const BasicTable: React.FC<PropsType> = ({
           />
         </div>
       </div>
+
+      <Modal
+        title="Add Product Modal"
+        width={{
+          xs: '100%',
+          sm: '80%',
+          md: '70%',
+          lg: '60%',
+          xl: '50%',
+          xxl: '40%',
+        }}
+        open={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <BasicTable
+          api={'Product'}
+          displayData={[
+            'id',
+            'name',
+            'barcode',
+            'costPrice',
+            'retailPrice',
+            'wholesalePrice',
+          ]}
+          fetch={async (url) => {
+            const response = await Get(url);
+            return response;
+          }}
+          actionComponent={actionForModal}
+        />
+      </Modal>
+
+      {/* <BarcodeScannerModal
+        isModalOpenForBarcode={isModalOpenForBarcode}
+        setIsModalOpenForBarcode={setIsModalOpenForBarcode}
+      ></BarcodeScannerModal> */}
+      <Html5DectorModal
+        isOpen={isModalOpenForBarcode}
+        setIsOpen={setIsModalOpenForBarcode}
+      ></Html5DectorModal>
+
+      <Modal
+        width={{
+          xs: '100%',
+          sm: '80%',
+          md: '70%',
+          lg: '60%',
+          xl: '50%',
+          xxl: '40%',
+        }}
+        title="Fix Quantity"
+        open={isQuantityModalOpen} // Change to a state variable like isFixQuantityModalOpen when integrating
+        onOk={() => {
+          setisQuantityModalOpen(false);
+        }}
+        onCancel={() => {
+          // handle close modal logic here
+          setisQuantityModalOpen(false);
+        }}
+      >
+        <Form layout="vertical">
+          <Form.Item
+            label="New Quantity"
+            name="quantity"
+            rules={[
+              { required: true, message: 'Please input the new quantity!' },
+            ]}
+          >
+            <Input type="number" min={0} />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <ToastContainer />
     </>
   );
 };

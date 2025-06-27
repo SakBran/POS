@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: dev-sqlserver
+    container_name: dev-sqlserver-pos
     ports:
       - "1433:1433"
     environment:
@@ -11,12 +11,13 @@ services:
       - SA_PASSWORD=Saobran131994
       - MSSQL_PID=Express
     volumes:
-      - /Users/saobranaung/Database/Template/DB:/var/opt/mssql/data
+      - /Users/saobranaung/Database/POS/DB:/var/opt/mssql/data
     networks:
       - app-network
     restart: unless-stopped
 
   backend:
+    container_name: backend-pos
     build:
       context: ./Backend
       dockerfile: Dockerfile.dev
@@ -26,13 +27,14 @@ services:
       - ./Backend:/app
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=TemplateDB;User=sa;Password=Saobran131994;MultipleActiveResultSets=true;TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Server=db;Database=POS;User=sa;Password=Saobran131994;MultipleActiveResultSets=true;TrustServerCertificate=True;
     networks:
       - app-network
     depends_on:
       - db
 
   frontend:
+    container_name: frontend-pos
     build:
       context: ./Frontend
       dockerfile: dockerfile.dev

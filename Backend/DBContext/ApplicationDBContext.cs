@@ -18,6 +18,7 @@ namespace API.DBContext
         public DbSet<TokenModel> TokenModels { get; set; }
         public DbSet<SystemSetting> SystemSetting { get; set; }
         public DbSet<ChatModel> ChatModels { get; set; }
+        public DbSet<Product> Products { get; set; }
 
 
 

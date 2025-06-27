@@ -1,12 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ConfigProvider, Layout, Menu, MenuProps, SiderProps } from 'antd';
-import { BranchesOutlined, PieChartOutlined } from '@ant-design/icons';
+import {
+  BarChartOutlined,
+  BranchesOutlined,
+  DropboxOutlined,
+  PieChartOutlined,
+} from '@ant-design/icons';
 import { Logo } from '../../components';
 import { Link, useLocation } from 'react-router-dom';
 import { PATH_LANDING } from '../../constants';
 import { COLOR } from '../../App.tsx';
 import { PATH_DASHBOARD } from '../../constants/routes.ts';
 import { useMediaQuery } from 'react-responsive';
+import GetGUID from '../../services/GUIDService.ts';
 
 const { Sider } = Layout;
 
@@ -31,24 +37,50 @@ const getItem = (
 const items: MenuProps['items'] = [
   getItem(
     <Link to={PATH_DASHBOARD.default}>Dashboard</Link>,
-    'default',
+    '/dashboards/default',
     <PieChartOutlined />
   ),
+
+  getItem('Newsale', 'Newsale', <BarChartOutlined />, [
+    // getItem(<Link to="/Newsale/List">List</Link>, 'List', null),
+    getItem(
+      <Link to={`/Newsale/Edit/${GetGUID()}`}>New</Link>,
+      '/Newsale/Edit',
+      null
+    ),
+  ]),
+
+  getItem('Products', 'Products', <DropboxOutlined />, [
+    getItem(<Link to="/Products/List">List</Link>, '/Products/List', null),
+    getItem(<Link to={`/Products/New`}>New</Link>, '/Products/New', null),
+  ]),
+
   getItem('Users', 'Users', <PieChartOutlined />, [
-    getItem(<Link to="/User/List">List</Link>, 'List', null),
-    getItem(<Link to="/User/New">New</Link>, 'New', null),
+    getItem(<Link to="/User/List">List</Link>, '/User/List', null),
+    getItem(<Link to="/User/New">New</Link>, '/User/New', null),
   ]),
 
   getItem(
     <Link to={'/Timeline/Detail'}>Timeline</Link>,
-    'timeline',
+    '/Timeline/Detail',
     <BranchesOutlined />
   ),
 
-  getItem(<Link to={'/Test/New'}>Test</Link>, 'test', <BranchesOutlined />),
+  getItem(
+    <Link to={'/Test/New'}>Test</Link>,
+    '/Test/New',
+    <BranchesOutlined />
+  ),
 ];
 
-const rootSubmenuKeys = ['dashboards', 'corporate', 'user-profile', 'users'];
+const rootSubmenuKeys = [
+  '',
+  // 'dashboards',
+  // 'corporate',
+  // 'user-profile',
+  // 'Users',
+  // 'Newsale',
+];
 
 type SideNavProps = SiderProps & {
   setCollapse: (value: React.SetStateAction<boolean>) => void;
@@ -62,25 +94,26 @@ const SideNav = ({ setCollapse, ...others }: SideNavProps) => {
   const isMobile = useMediaQuery({ maxWidth: 769 });
 
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e);
     if (isMobile) {
       setCollapse(true);
     }
   };
 
-  const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
-    const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
+  const onOpenChange: MenuProps['onOpenChange'] = (keys: any) => {
+    const latestOpenKey = keys.find((key: any) => openKeys.indexOf(key) === -1);
     if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey!) === -1) {
       setOpenKeys(keys);
+      console.log('open key' + keys);
     } else {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     }
   };
 
   useEffect(() => {
-    const paths = pathname.split('/');
+    // const paths = pathname.split('/');
     // setOpenKeys(paths);
-    setCurrent(paths[paths.length - 1]);
+    setCurrent(pathname);
+    // console.log(pathname);
   }, [pathname]);
 
   return (

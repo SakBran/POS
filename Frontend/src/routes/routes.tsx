@@ -23,6 +23,9 @@ import ProtectedRoute from './ProtectedRoute.tsx';
 import TimelinePage from '../pages/Timeline/Timeline.tsx';
 import Certificate from '../pages/certificate/Certificate.tsx';
 import Test from '../pages/Test.tsx';
+import Newsale from '../pages/Newsale/Newsale.tsx';
+import ProductList from '../pages/Product/ProductList.tsx';
+import ProductPage from '../pages/Product/ProductPage.tsx';
 
 // Custom scroll restoration function
 export const ScrollToTop: React.FC = () => {
@@ -202,6 +205,25 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/Newsale',
+    element: (
+      <PageWrapper>
+        <DashboardLayout />
+      </PageWrapper>
+    ),
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: 'New',
+        element: <Newsale />,
+      },
+      {
+        path: 'Edit/:id',
+        element: <Newsale />,
+      },
+    ],
+  },
+  {
     path: '/Test',
     element: (
       <PageWrapper>
@@ -217,6 +239,41 @@ const router = createBrowserRouter([
       {
         path: 'Edit/:id',
         element: <Test />,
+      },
+    ],
+  },
+  {
+    path: `/Products`,
+    element: (
+      <PageWrapper>
+        <DashboardLayout />
+      </PageWrapper>
+    ),
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: 'List',
+        element: <ProductList />,
+      },
+      {
+        path: 'New',
+        element: <ProductPage />,
+      },
+      {
+        path: 'Edit/:id',
+        element: <ProductPage />,
+      },
+      {
+        path: 'Delete/:id',
+        element: <ProductPage />,
+      },
+      {
+        path: 'ToggleActive/:id',
+        element: <ProductPage />,
+      },
+      {
+        path: 'Detail/:id',
+        element: <ProductPage />,
       },
     ],
   },
