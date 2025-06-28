@@ -480,7 +480,8 @@ export const NewsaleTable: React.FC<PropsType> = ({
                   );
                 })}
                 <tr>
-                  <td colSpan={3}>
+                  <td>ပစ္စည်းအမျိုးအရေတွက် - {data.data.length} မျိုး</td>
+                  <td colSpan={2}>
                     <Typography.Text
                       style={{
                         display: 'flex',
@@ -489,7 +490,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
                       }}
                     >
                       {' '}
-                      Total
+                      စုစုပေါင်း
                     </Typography.Text>
                   </td>
                   <td>{total.quantity}</td>

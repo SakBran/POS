@@ -46,7 +46,7 @@ export const Logo = ({
             borderRadius,
           }}
         >
-          Antd Admin
+          Yumi POS
         </Typography.Title>
       </Flex>
     </Link>
@@ -68,7 +68,7 @@ export const Logo = ({
           borderRadius,
         }}
       >
-        Antd Admin
+        Yumi POS
       </Typography.Title>
     </Flex>
   );
