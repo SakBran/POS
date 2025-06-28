@@ -98,5 +98,42 @@ namespace Backend.Controllers.Sale
 
         }
 
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteData(string id)
+        {
+            var temp = await _context.FindAsync<SaleDetail>(id);
+            if (temp == null)
+            {
+                return NotFound();
+            }
+            _context.SaleDetails.Remove(temp);
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPut("FixQuantity")]
+        public async Task<IActionResult> FixQuantity(EditQuantityRequest data)
+        {
+            var loginUserId = await _loginCredential.GetLoginUserId();
+            if (loginUserId == null)
+            {
+                return Unauthorized("Request User is not valid!");
+            }
+            var saleData = await _context.SaleDetails.Where(x => x.RootUserId == loginUserId && x.Id == data.ProductId && x.SaleId == data.SalesId).FirstOrDefaultAsync();
+            if (saleData != null)
+            {
+                saleData.Quantity = data.Quantity;
+                await _context.SaveChangesAsync();
+                return Ok(saleData);
+            }
+            else
+            {
+                return NotFound("Product does not exist anymore!");
+            }
+
+        }
+
     }
 }

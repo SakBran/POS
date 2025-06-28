@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './style.css';
 
 import TableAction from '../TableAction/TableAction';
@@ -21,7 +21,11 @@ import {
 
 import NameConvert from '../../../services/NameConvert';
 import { PaginationType } from '../../../types/PaginationType';
-import { PlusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import {
+  DollarOutlined,
+  PlusCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
 import * as XLSX from 'xlsx';
 import { BasicTable } from './BasicTable';
 import { Get } from '../../../services/BasicHttpServices';
@@ -47,6 +51,17 @@ interface PropsType {
 export interface AddRequest {
   productId: string;
   salesId: string;
+}
+
+export interface EditQuantityRequest {
+  productId: string;
+  salesId: string;
+  quantity: number;
+}
+
+interface TotalValue {
+  quantity: number;
+  amount: number;
 }
 
 export const NewsaleTable: React.FC<PropsType> = ({
@@ -87,10 +102,13 @@ export const NewsaleTable: React.FC<PropsType> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenForBarcode, setIsModalOpenForBarcode] = useState(false);
   const [isQuantityModalOpen, setisQuantityModalOpen] = useState(false);
-
+  const [reload, setReload] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(0);
+  const [quantityId, setQuantityId] = useState<string>('');
   const screens = useBreakpoint();
   const isSmOrBelow = !screens.lg;
   const [url, setUrl] = useState('');
+  const [total, setTotal] = useState<TotalValue>({ quantity: 0, amount: 0 });
   const handleSort = (column: string) => {
     setSortColumn(column);
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -103,12 +121,12 @@ export const NewsaleTable: React.FC<PropsType> = ({
     const onClick = (e: any) => {
       e.preventDefault();
       const SaveTask = async () => {
-        const data: AddRequest = {
+        const postdata: AddRequest = {
           productId: dataId,
           salesId: salesId,
         };
         await toast.promise(
-          axiosInstance.post<AddRequest>('Retail/AddByTable', data),
+          axiosInstance.post<AddRequest>('Retail/AddByTable', postdata),
           {
             pending: 'Loading user…',
             success: 'Loaded user successfully',
@@ -123,6 +141,92 @@ export const NewsaleTable: React.FC<PropsType> = ({
         <Space>Add</Space>
       </a>
     );
+  };
+
+  const actionForDelete = (deleteId: any) => {
+    const { id } = deleteId;
+    const onClick = (e: any) => {
+      e.preventDefault();
+      const handleDelete = async (id: string) => {
+        try {
+          await toast.promise(axiosInstance.delete(`Retail/${id}`), {
+            pending: 'Deleting...',
+            success: {
+              render() {
+                // You can also update state here
+                return 'Deleted successfully';
+              },
+            },
+            error: {
+              render() {
+                return 'Failed to delete!';
+              },
+            },
+          });
+
+          // After success, update your state
+          const filteredData = data.data.filter((item) => item.id !== id);
+          console.log(filteredData);
+          setData({
+            ...data,
+            data: filteredData,
+            totalCount: data.totalCount - 1,
+          });
+
+          // setData(filteredData) // if you want to update UI
+        } catch (err) {
+          // Error is already handled in toast
+        }
+      };
+      handleDelete(id);
+    };
+    return (
+      <a onClick={onClick}>
+        <Space>Delete</Space>
+      </a>
+    );
+  };
+
+  const actionForEditQuantity = (QuantityId: any) => {
+    const Task = async (id: string) => {
+      try {
+        const postdata: EditQuantityRequest = {
+          productId: quantityId,
+          salesId: salesId,
+          quantity: quantity,
+        };
+        await toast.promise(axiosInstance.put(`Retail/FixQuantity`, postdata), {
+          pending: 'Updating...',
+          success: {
+            render() {
+              // You can also update state here
+              return 'Updated successfully';
+            },
+          },
+          error: {
+            render() {
+              return 'Failed to update!';
+            },
+          },
+        });
+
+        // After success, update your state
+        const filteredData = data.data.map((item) =>
+          item.id === id ? { ...item, quantity: quantity } : item
+        );
+
+        console.log(filteredData);
+        setData({
+          ...data,
+          data: filteredData,
+        });
+        setisQuantityModalOpen(false);
+      } catch (err) {
+        console.log(err);
+        // Error is already handled in toast
+      }
+    };
+    Task(QuantityId);
   };
 
   //ဒီထဲကParameterက Dotnet Core ထဲကPagination Getနဲ့ညှိပေးထားတာ
@@ -165,7 +269,24 @@ export const NewsaleTable: React.FC<PropsType> = ({
       }
     };
     call();
-  }, [fetch, url, isModalOpen]);
+  }, [fetch, url, isModalOpen, reload]);
+
+  useEffect(() => {
+    if (data && data.data && data.data.length > 0) {
+      const totalQuantity = data.data.reduce(
+        (sum, item) => sum + (+item.quantity || 0),
+        0
+      );
+      const totalAmount = data.data.reduce((sum, item) => {
+        const unitPrice = +item.unitPrice || 0;
+        const quantity = +item.quantity || 0;
+        return sum + unitPrice * quantity;
+      }, 0);
+      setTotal({ quantity: totalQuantity, amount: totalAmount });
+    } else {
+      setTotal({ quantity: 0, amount: 0 });
+    }
+  }, [data]);
 
   const exportToExcel = () => {
     const table = document.getElementById('reportTable');
@@ -298,7 +419,11 @@ export const NewsaleTable: React.FC<PropsType> = ({
               <tbody>
                 {data.data?.map((row, index) => {
                   const dataCells = displayData.map((display: string, i) => {
-                    if (display !== 'id' && display !== 'quantity') {
+                    if (
+                      display !== 'id' &&
+                      display !== 'quantity' &&
+                      display !== 'total'
+                    ) {
                       const cellValue = row[display];
                       return <td key={i}>{cellValue?.toString() ?? 'N/A'}</td>;
                     } else if (display === 'quantity') {
@@ -310,7 +435,11 @@ export const NewsaleTable: React.FC<PropsType> = ({
                         >
                           <td
                             key={i}
-                            onClick={() => setisQuantityModalOpen(true)}
+                            onClick={() => {
+                              setQuantityId(row['id']);
+                              setQuantity(+cellValue?.toString());
+                              setisQuantityModalOpen(true);
+                            }}
                           >
                             <Typography.Link
                               strong
@@ -323,6 +452,10 @@ export const NewsaleTable: React.FC<PropsType> = ({
                           </td>
                         </Tooltip>
                       );
+                    } else if (display === 'total') {
+                      const unitPrice = +row['unitPrice'];
+                      const quantity = +row['quantity'];
+                      return <td>{unitPrice * quantity}</td>;
                     } else {
                       return null;
                     }
@@ -335,13 +468,13 @@ export const NewsaleTable: React.FC<PropsType> = ({
                       </td>
                       {dataCells}
                       <td className="action-column-cell">
-                        {actionComponent ? (
-                          React.createElement(actionComponent, {
-                            id: row['id'],
-                          })
-                        ) : (
-                          <TableAction id={row['id']} />
-                        )}
+                        {actionComponent
+                          ? React.createElement(actionComponent, {
+                              id: row['id'],
+                            })
+                          : React.createElement(actionForDelete, {
+                              id: row['id'],
+                            })}
                       </td>
                     </tr>
                   );
@@ -359,9 +492,19 @@ export const NewsaleTable: React.FC<PropsType> = ({
                       Total
                     </Typography.Text>
                   </td>
-                  <td>10</td>
-                  <td>100</td>
-                  <td></td>
+                  <td>{total.quantity}</td>
+                  <td>{total.amount}</td>
+                  <td>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        //setIsModalOpen(true);
+                      }}
+                    >
+                      <DollarOutlined />
+                      ရှင်းမည်။
+                    </Button>
+                  </td>
                 </tr>
               </tbody>
             )}
@@ -485,27 +628,38 @@ export const NewsaleTable: React.FC<PropsType> = ({
           xl: '50%',
           xxl: '40%',
         }}
-        title="Fix Quantity"
+        title="..."
         open={isQuantityModalOpen} // Change to a state variable like isFixQuantityModalOpen when integrating
         onOk={() => {
-          setisQuantityModalOpen(false);
+          actionForEditQuantity(quantityId);
         }}
         onCancel={() => {
           // handle close modal logic here
           setisQuantityModalOpen(false);
         }}
       >
-        <Form layout="vertical">
+        {/* <Form layout="vertical">
           <Form.Item
             label="New Quantity"
             name="quantity"
             rules={[
               { required: true, message: 'Please input the new quantity!' },
             ]}
-          >
-            <Input type="number" min={0} />
-          </Form.Item>
-        </Form>
+          > */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <Space>
+            Enter Quantity:
+            <Input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(+e.target.value)}
+              min={0}
+            />
+          </Space>
+        </div>
+
+        {/* </Form.Item>
+        </Form> */}
       </Modal>
       <ToastContainer />
     </>

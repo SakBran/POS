@@ -5,6 +5,7 @@ import { NewsaleTable } from '../../components/My Components/Table/NewsaleTable'
 
 const Newsale = () => {
   const route = location.pathname.toString().split('/');
+
   const id = route[3] ?? toString();
   const transformUserData = (data: PaginationType): PaginationType => {
     return {
@@ -27,12 +28,12 @@ const Newsale = () => {
 
       <NewsaleTable
         api={`Retail/GetByCartId?saleId=${id}`}
-        displayData={['name', 'unitPrice', 'quantity', 'Amount', 'id']}
+        displayData={['name', 'unitPrice', 'quantity', 'total', 'id']}
         fetch={async (url) => {
           const response = await Get(url);
           return transformUserData(response);
         }}
-        // actionComponent={UserTableAction}
+        //actionComponent={actionForDelete}
       />
     </>
   );

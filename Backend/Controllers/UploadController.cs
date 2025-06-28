@@ -100,7 +100,7 @@ namespace Backend.Controllers
             }
         }
 
-        public async Task<string> SaveAsWebpAsync(IFormFile file, string filePath)
+        private async Task<string> SaveAsWebpAsync(IFormFile file, string filePath)
         {
             // 1. Make sure the directory exists.
             Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
