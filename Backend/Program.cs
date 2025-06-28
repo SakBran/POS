@@ -1,6 +1,7 @@
 using API.DBContext;
 using API.Interface;
 using API.Service;
+using Backend.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -21,6 +22,7 @@ internal class Program
         builder.Services.AddMemoryCache();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddAuthentication(x =>
@@ -49,6 +51,7 @@ internal class Program
         });
         builder.Services.AddScoped<IJWTManagerService, JWTManagerService>();
         builder.Services.AddScoped(typeof(ICommonService<>), typeof(CommonService<>));
+        builder.Services.AddScoped<IGetaccessTokenService, GetAccessTokenService>();
 
         var app = builder.Build();
 

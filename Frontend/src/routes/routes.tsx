@@ -26,6 +26,7 @@ import Test from '../pages/Test.tsx';
 import Newsale from '../pages/Newsale/Newsale.tsx';
 import ProductList from '../pages/Product/ProductList.tsx';
 import ProductPage from '../pages/Product/ProductPage.tsx';
+import GenerateGUIDPage from '../pages/Newsale/GenerateGUIDPage.tsx';
 
 // Custom scroll restoration function
 export const ScrollToTop: React.FC = () => {
@@ -215,7 +216,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'New',
-        element: <Newsale />,
+        element: <GenerateGUIDPage />,
       },
       {
         path: 'Edit/:id',

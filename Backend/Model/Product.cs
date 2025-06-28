@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,6 +12,7 @@ namespace Backend.Model
         {
             this.Id = Guid.NewGuid().ToString();
         }
+        [Key]
         public string Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Barcode { get; set; } = string.Empty;

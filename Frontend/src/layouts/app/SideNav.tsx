@@ -43,11 +43,7 @@ const items: MenuProps['items'] = [
 
   getItem('Newsale', 'Newsale', <BarChartOutlined />, [
     // getItem(<Link to="/Newsale/List">List</Link>, 'List', null),
-    getItem(
-      <Link to={`/Newsale/Edit/${GetGUID()}`}>New</Link>,
-      '/Newsale/Edit',
-      null
-    ),
+    getItem(<Link to={`/Newsale/New`}>New</Link>, '/Newsale/New', null),
   ]),
 
   getItem('Products', 'Products', <DropboxOutlined />, [
@@ -112,7 +108,14 @@ const SideNav = ({ setCollapse, ...others }: SideNavProps) => {
   useEffect(() => {
     // const paths = pathname.split('/');
     // setOpenKeys(paths);
-    setCurrent(pathname);
+
+    console.log(pathname);
+    if (pathname.includes('Edit')) {
+      const basePath = pathname.split('/').slice(0, 3).join('/');
+      setCurrent(basePath);
+    } else {
+      setCurrent(pathname);
+    }
     // console.log(pathname);
   }, [pathname]);
 

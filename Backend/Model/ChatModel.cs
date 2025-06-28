@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,6 +12,7 @@ namespace Backend.Model
         {
             this.Id = Guid.NewGuid().ToString();
         }
+        [Key]
         public string Id { get; set; } // Guid or Mongo Id
         public string? Room { get; set; }
         public string? Sender { get; set; }

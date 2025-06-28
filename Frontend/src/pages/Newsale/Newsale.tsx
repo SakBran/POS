@@ -4,6 +4,8 @@ import { PaginationType } from '../../types/PaginationType';
 import { NewsaleTable } from '../../components/My Components/Table/NewsaleTable';
 
 const Newsale = () => {
+  const route = location.pathname.toString().split('/');
+  const id = route[3] ?? toString();
   const transformUserData = (data: PaginationType): PaginationType => {
     return {
       ...data,
@@ -24,8 +26,8 @@ const Newsale = () => {
       <PageHeader title="New Sale" />
 
       <NewsaleTable
-        api={'User'}
-        displayData={['name', 'price', 'quantity', 'Amount', 'id']}
+        api={`Retail/GetByCartId?saleId=${id}`}
+        displayData={['name', 'unitPrice', 'quantity', 'Amount', 'id']}
         fetch={async (url) => {
           const response = await Get(url);
           return transformUserData(response);

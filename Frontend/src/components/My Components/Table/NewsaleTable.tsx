@@ -27,6 +27,7 @@ import { BasicTable } from './BasicTable';
 import { Get } from '../../../services/BasicHttpServices';
 import Html5DectorModal from '../BarcodeDector/Html5Dector';
 import { ToastContainer, toast } from 'react-toastify';
+import axiosInstance from '../../../services/AxiosInstance';
 
 const { useBreakpoint } = Grid;
 
@@ -41,6 +42,11 @@ interface PropsType {
   api: string;
   fetch: (url: string) => Promise<PaginationType>;
   actionComponent?: React.FC<{ id: string }>; // add this props for userTableAction
+}
+
+export interface AddRequest {
+  productId: string;
+  salesId: string;
 }
 
 export const NewsaleTable: React.FC<PropsType> = ({
@@ -77,6 +83,11 @@ export const NewsaleTable: React.FC<PropsType> = ({
   const [pageSize, setPageSize] = useState(10);
   const [data, setData] = useState<PaginationType>(intialValue);
 
+  //For Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenForBarcode, setIsModalOpenForBarcode] = useState(false);
+  const [isQuantityModalOpen, setisQuantityModalOpen] = useState(false);
+
   const screens = useBreakpoint();
   const isSmOrBelow = !screens.lg;
   const [url, setUrl] = useState('');
@@ -85,10 +96,39 @@ export const NewsaleTable: React.FC<PropsType> = ({
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
+  const route = location.pathname.toString().split('/');
+  const salesId = route[3] ?? toString();
+  const actionForModal = (id: any) => {
+    const { id: dataId } = id;
+    const onClick = (e: any) => {
+      e.preventDefault();
+      const SaveTask = async () => {
+        const data: AddRequest = {
+          productId: dataId,
+          salesId: salesId,
+        };
+        await toast.promise(
+          axiosInstance.post<AddRequest>('Retail/AddByTable', data),
+          {
+            pending: 'Loading user…',
+            success: 'Loaded user successfully',
+            error: 'Couldn’t load user!',
+          }
+        );
+      };
+      SaveTask();
+    };
+    return (
+      <a onClick={onClick}>
+        <Space>Add</Space>
+      </a>
+    );
+  };
+
   //ဒီထဲကParameterက Dotnet Core ထဲကPagination Getနဲ့ညှိပေးထားတာ
   //တကယ်လို့ပြင်ချင်ရင် Parameter တွေပြင်သုံးပေါ့
   useEffect(() => {
-    let temp = `${api}?pageIndex=${
+    let temp = `${api}&pageIndex=${
       pageIndex < 0 ? 0 : pageIndex
     }&pageSize=${pageSize}`;
 
@@ -112,6 +152,9 @@ export const NewsaleTable: React.FC<PropsType> = ({
   ]);
 
   useEffect(() => {
+    if (isModalOpen === true) {
+      return;
+    }
     setloading(true);
     const call = async () => {
       try {
@@ -122,7 +165,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
       }
     };
     call();
-  }, [fetch, url]);
+  }, [fetch, url, isModalOpen]);
 
   const exportToExcel = () => {
     const table = document.getElementById('reportTable');
@@ -130,30 +173,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
     XLSX.writeFile(wb, 'Report.xlsx');
   };
 
-  const actionForModal = (id: any) => {
-    const { id: dataId } = id;
-    const onClick = (e: any) => {
-      e.preventDefault();
-      // await toast.promise(axios.get('/api/users/42'), {
-      //   pending: 'Loading user…',
-      //   success: (res) => `Loaded user ${res.data.name}`,
-      //   error: 'Couldn’t load user!',
-      // });
-      toast.success(`The object id is ${dataId}`);
-    };
-    return (
-      <a onClick={onClick}>
-        <Space>Add</Space>
-      </a>
-    );
-  };
-
   const { Option } = Select;
-
-  //For Modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpenForBarcode, setIsModalOpenForBarcode] = useState(false);
-  const [isQuantityModalOpen, setisQuantityModalOpen] = useState(false);
 
   return (
     <>
