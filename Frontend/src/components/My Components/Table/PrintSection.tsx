@@ -1,8 +1,44 @@
+import { AnyObject } from 'antd/es/_util/type';
 import React from 'react';
 interface Props {
   printRef: React.RefObject<HTMLDivElement | null>;
+  dataList: AnyObject[];
+  invoiceNo: string;
+  invoiceDate: string;
+  total: number;
+  subTotal: number;
+  deliveryFee: number;
+  discount: number;
+  tax: number;
 }
-const PrintSection = ({ printRef }: Props) => {
+
+export interface SaleDetail {
+  id: string;
+  saleId: string;
+  productId: string;
+  name: string;
+  unitId: string | number;
+  quantity: number;
+  quantityInBase: number;
+  unitPrice: number;
+  total: number;
+  remarks: string | null;
+  storeId: string | null;
+  storeName: string | null;
+  rootUserId: string;
+}
+
+const PrintSection = ({
+  printRef,
+  dataList,
+  invoiceNo,
+  invoiceDate,
+  total,
+  subTotal,
+  deliveryFee,
+  discount,
+  tax,
+}: Props) => {
   return (
     <div ref={printRef} style={{ display: 'none' }}>
       <div className="receipt">
@@ -10,28 +46,54 @@ const PrintSection = ({ printRef }: Props) => {
         <div className="center">Yangon, Myanmar</div>
         <div className="center">Tel: 09-123456789</div>
         <hr />
-        <div>Invoice #: 00123</div>
-        <div>Date: 2025-06-29</div>
+        <div>Invoice #: {invoiceNo}</div>
+        <div>Date: {invoiceDate}</div>
         <hr />
-        <div className="item">
-          <span>Item A x2</span>
-          <span>2000 MMK</span>
+        {dataList.map((data: any, index) => {
+          const item: SaleDetail = JSON.parse(JSON.stringify(data));
+          return (
+            <div key={index} className="item">
+              <span>
+                {item.name} x{item.quantity}
+              </span>
+              <span>{item.unitPrice} MMK</span>
+            </div>
+          );
+        })}
+
+        <hr />
+
+        <div className="item bold">
+          <span>Sub Total</span>
+          <span>{subTotal} MMK</span>
         </div>
-        <div className="item">
-          <span>Item B x1</span>
-          <span>1000 MMK</span>
+
+        <div className="item bold">
+          <span>Discount</span>
+          <span>{discount} MMK</span>
         </div>
-        <div className="item">
-          <span>Item C x3</span>
-          <span>4500 MMK</span>
+
+        <div className="item bold">
+          <span>Tax</span>
+          <span>{tax} MMK</span>
+        </div>
+
+        <div className="item bold">
+          <span>Delivery Fee</span>
+          <span>{deliveryFee} MMK</span>
         </div>
         <hr />
+
         <div className="item bold">
           <span>Total</span>
-          <span>7500 MMK</span>
+          <span>{total} MMK</span>
         </div>
+
         <hr />
-        <div className="center">Thank you!</div>
+        <div className="center">Thank you for using Yumi free POS!</div>
+        <div className="center" style={{ paddingTop: 5 }}>
+          https://sakbran.github.io
+        </div>
       </div>
     </div>
   );

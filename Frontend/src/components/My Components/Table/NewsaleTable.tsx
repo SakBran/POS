@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './style.css';
 
 import {
@@ -60,6 +60,54 @@ interface TotalValue {
   amount: number;
 }
 
+export interface Sale {
+  id: string;
+  customerId: string | null;
+  customerName: string;
+  saleDate: string; // ISO date string
+  voucherNumber: string;
+  saleType: 'Retail' | 'Wholesale' | string;
+  subtotal: number;
+  discountType: 'Fixed' | 'Percentage' | string;
+  discount: number;
+  tax: number;
+  deliveryFee: number;
+  total: number;
+  amountPaid: number;
+  balance: number;
+  paymentMethod: 'cash' | 'card' | 'credit' | string;
+  isPaidInFull: boolean;
+  createdAt: string; // ISO timestamp
+  updatedAt: string | null;
+  storeId: string | null;
+  storeName: string | null;
+  rootUserId: string;
+}
+
+const initialSale: Sale = {
+  id: '',
+  customerId: null,
+  customerName: 'Walk in customer',
+  saleDate: new Date().toISOString().split('T')[0], // e.g., "2025-06-29"
+  voucherNumber: '',
+  saleType: 'Retail',
+  subtotal: 0,
+  discountType: 'Fixed',
+  discount: 0,
+  tax: 0,
+  deliveryFee: 0,
+  total: 0,
+  amountPaid: 0,
+  balance: 0,
+  paymentMethod: 'cash',
+  isPaidInFull: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: null,
+  storeId: null,
+  storeName: null,
+  rootUserId: '',
+};
+
 export const NewsaleTable: React.FC<PropsType> = ({
   displayData,
   api,
@@ -109,6 +157,8 @@ export const NewsaleTable: React.FC<PropsType> = ({
   const [total, setTotal] = useState<TotalValue>({ quantity: 0, amount: 0 });
   const [isPaid, setIsPaid] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const [sale, setSale] = useState<Sale>(initialSale);
 
   const handleSort = (column: string) => {
     setSortColumn(column);
@@ -255,6 +305,8 @@ export const NewsaleTable: React.FC<PropsType> = ({
       );
       const temp = response.data;
       if (temp) {
+        const sale: Sale = JSON.parse(JSON.stringify(temp));
+        setSale(sale);
         setIsPaid(true);
       } else {
         setIsPaid(false);
@@ -538,16 +590,28 @@ export const NewsaleTable: React.FC<PropsType> = ({
                         ရှင်းမည်။
                       </Button>
                     )}
+
                     {isPaid && (
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          handlePrint();
-                        }}
-                      >
-                        <PrinterOutlined />
-                        ပြေစာထုတ်မည်။
-                      </Button>
+                      <Space>
+                        <Button
+                          type="primary"
+                          onClick={() => {
+                            setIsPaymentModalOpen(true);
+                          }}
+                        >
+                          <DollarOutlined />
+                          အချက်လက်ပြန်ပြင်မည်။
+                        </Button>
+                        <Button
+                          type="primary"
+                          onClick={() => {
+                            handlePrint();
+                          }}
+                        >
+                          <PrinterOutlined />
+                          ပြေစာထုတ်မည်။
+                        </Button>
+                      </Space>
                     )}
                   </td>
                 </tr>
@@ -702,10 +766,21 @@ export const NewsaleTable: React.FC<PropsType> = ({
         setIsPaid={setIsPaid}
         isPaid={isPaid}
         subTotal={total.amount}
+        setSale={setSale}
       ></PaymentModal>
 
       {/* Hidden or styled section for print */}
-      <PrintSection printRef={printRef}></PrintSection>
+      <PrintSection
+        printRef={printRef}
+        dataList={data.data}
+        invoiceNo={salesId}
+        invoiceDate={new Date().toLocaleDateString('en-GB')}
+        total={sale.total}
+        subTotal={sale.subtotal}
+        deliveryFee={sale.deliveryFee}
+        discount={sale.discount}
+        tax={sale.tax}
+      ></PrintSection>
 
       <ToastContainer />
     </>

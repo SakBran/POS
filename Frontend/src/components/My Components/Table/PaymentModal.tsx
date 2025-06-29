@@ -4,12 +4,15 @@ import useFormActions from '../../../hooks/useFormActions';
 import useFormhelper from '../../../hooks/useFormhelper';
 import { useEffect, useState } from 'react';
 import React from 'react';
+import { Sale } from './NewsaleTable';
+import axiosInstance from '../../../services/AxiosInstance';
 interface Props {
   isPaymentModalOpen: boolean;
   setIsPaymentModalOpen: (value: React.SetStateAction<boolean>) => void;
   isPaid: boolean;
   setIsPaid: (value: React.SetStateAction<boolean>) => void;
   subTotal: number;
+  setSale: (value: React.SetStateAction<Sale>) => void;
 }
 const APIURL = 'RetailSales/PaymentRecord';
 const PaymentModal = ({
@@ -18,18 +21,30 @@ const PaymentModal = ({
   isPaid,
   setIsPaid,
   subTotal,
+  setSale,
 }: Props) => {
-  const { readOnly, id, action } = useFormhelper();
+  const { readOnly, id } = useFormhelper();
   const formRef = React.useRef<FormInstance>(null);
-  const { onFinish, writeLoading } = useFormActions(id, action, APIURL);
+
   const [loading, setLoading] = useState<boolean>(false);
   const modifiedOnFinish = (value: unknown) => {
+    setLoading(true);
     try {
-      onFinish(value);
-      setIsPaid(true);
-      setIsPaymentModalOpen(false);
+      // onFinish(value);
+      const Task = async () => {
+        const response = await axiosInstance.put(APIURL + '/' + id, value);
+        const temp = await response.data;
+        const saleData: Sale = JSON.parse(JSON.stringify(temp));
+        setSale(saleData);
+        setIsPaid(true);
+        setLoading(false);
+        setIsPaymentModalOpen(false);
+      };
+      Task();
     } catch (ex) {
       console.log(ex);
+      setLoading(false);
+      setIsPaymentModalOpen(false);
     }
   };
   useEffect(() => {
@@ -98,7 +113,7 @@ const PaymentModal = ({
       <BasicForm
         formRef={formRef}
         onFinish={modifiedOnFinish}
-        readOnly={loading || writeLoading || readOnly}
+        readOnly={loading || readOnly}
         loading={loading}
       >
         <Row gutter={[16, 16]}>
