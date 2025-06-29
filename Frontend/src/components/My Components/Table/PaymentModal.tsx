@@ -9,7 +9,7 @@ interface Props {
   setIsPaymentModalOpen: (value: React.SetStateAction<boolean>) => void;
   subTotal: number;
 }
-const APIURL = '';
+const APIURL = 'RetailSales/PaymentRecord';
 const PaymentModal = ({
   isPaymentModalOpen,
   setIsPaymentModalOpen,
@@ -23,6 +23,7 @@ const PaymentModal = ({
     onFinish(value);
   };
   useEffect(() => {
+    setLoading(true);
     formRef.current?.setFieldValue('subtotal', +subTotal);
     formRef.current?.setFieldValue('voucherNumber', id);
     formRef.current?.setFieldValue('paymentMethod', 'cash');
@@ -34,6 +35,7 @@ const PaymentModal = ({
     );
     totalHandler();
   }, [isPaymentModalOpen]);
+
   const totalHandler = () => {
     const subTotal = +formRef.current?.getFieldValue('subtotal') || 0;
     const tax = +formRef.current?.getFieldValue('tax') || 0;
@@ -47,12 +49,22 @@ const PaymentModal = ({
       discountValue = parseFloat(discount.replace('%', '')) || 0;
       console.log((subTotal * discountValue) / 100);
       total = subTotal + tax + deliveryFee - (subTotal * discountValue) / 100;
+      formRef.current?.setFieldValue('discountType', 'Percentage');
     } else {
       discountValue = parseFloat(discount) || 0;
       total = subTotal + tax + deliveryFee - discountValue;
+      formRef.current?.setFieldValue('discountType', 'Fixed');
     }
 
     formRef.current?.setFieldValue('total', total);
+    setLoading(false);
+  };
+
+  const balance = () => {
+    const Total = +formRef.current?.getFieldValue('total');
+    const Paid = +formRef.current?.getFieldValue('amountPaid');
+    const balance = Total - Paid;
+    formRef.current?.setFieldValue('balance', balance);
   };
   return (
     <Modal
@@ -96,8 +108,61 @@ const PaymentModal = ({
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
+            <Form.Item label="Discount Type" name="discountType">
+              <Select
+                placeholder="Select payment method"
+                onChange={(e) => {
+                  if (
+                    formRef.current?.getFieldValue('discountType') === 'Fixed'
+                  ) {
+                    var temp = formRef.current?.getFieldValue('discount');
+                    formRef.current.setFieldValue(
+                      'discount',
+                      temp.replace('%', '')
+                    );
+                  }
+                  if (
+                    formRef.current?.getFieldValue('discountType') ===
+                    'Percentage'
+                  ) {
+                    var temp = formRef.current?.getFieldValue('discount');
+                    if (+temp > 100) {
+                      formRef.current.setFieldValue('discount', '99%');
+                      totalHandler();
+                    } else {
+                      formRef.current.setFieldValue('discount', temp + '%');
+                      totalHandler();
+                    }
+                  }
+                }}
+              >
+                <Select.Option value="Fixed">Fixed Amount</Select.Option>
+                <Select.Option value="Percentage">Percentage (%)</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
             <Form.Item label="Discount" name="discount">
-              <Input onChange={totalHandler} />
+              <Input
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^0-9%]/g, '');
+                  const discountType =
+                    formRef.current?.getFieldValue('discountType');
+                  if (discountType === 'Percentage') {
+                    // Remove % for checking numeric value
+                    const numericValue =
+                      parseFloat(value.replace('%', '')) || 0;
+                    if (numericValue > 100) {
+                      value = '100%';
+                    } else if (value.includes('%')) {
+                      value = `${numericValue}%`;
+                    }
+                  }
+                  formRef.current?.setFieldValue('discount', value);
+                  totalHandler();
+                }}
+                value={formRef.current?.getFieldValue('discount')}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
@@ -117,11 +182,11 @@ const PaymentModal = ({
           </Col>
           <Col xs={24} sm={12}>
             <Form.Item label="AmountPaid" name="amountPaid">
-              <Input type="number" />
+              <Input type="number" onChange={balance} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
-            <Form.Item label="ပေးရန်ကျန်" name="debt">
+            <Form.Item label="ပေးရန်ကျန်" name="balance">
               <Input type="number" />
             </Form.Item>
           </Col>

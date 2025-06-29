@@ -41,9 +41,14 @@ const items: MenuProps['items'] = [
     <PieChartOutlined />
   ),
 
-  getItem('Newsale', 'Newsale', <BarChartOutlined />, [
+  getItem('New sale', 'Newsale', <BarChartOutlined />, [
     // getItem(<Link to="/Newsale/List">List</Link>, 'List', null),
-    getItem(<Link to={`/Newsale/New`}>New</Link>, '/Newsale/New', null),
+    getItem(<Link to={`/Newsale/New`}>Retail</Link>, '/Newsale/New', null),
+    getItem(
+      <Link to={`/WholeSale/New`}>Whole Sale</Link>,
+      '/WholeSale/New',
+      null
+    ),
   ]),
 
   getItem('Products', 'Products', <DropboxOutlined />, [
@@ -99,24 +104,18 @@ const SideNav = ({ setCollapse, ...others }: SideNavProps) => {
     const latestOpenKey = keys.find((key: any) => openKeys.indexOf(key) === -1);
     if (latestOpenKey && rootSubmenuKeys.indexOf(latestOpenKey!) === -1) {
       setOpenKeys(keys);
-      console.log('open key' + keys);
     } else {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     }
   };
 
   useEffect(() => {
-    // const paths = pathname.split('/');
-    // setOpenKeys(paths);
-
-    console.log(pathname);
     if (pathname.includes('Edit')) {
       const basePath = pathname.split('/').slice(0, 3).join('/');
       setCurrent(basePath);
     } else {
       setCurrent(pathname);
     }
-    // console.log(pathname);
   }, [pathname]);
 
   return (

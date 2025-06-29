@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './style.css';
 
 import {
@@ -31,8 +31,6 @@ import { Get } from '../../../services/BasicHttpServices';
 import Html5DectorModal from '../BarcodeDector/Html5Dector';
 import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from '../../../services/AxiosInstance';
-import BasicForm from '../Form/BasicForm';
-import { AjaxButton } from '../AjaxButton/AjaxButton';
 import PaymentModal from './PaymentModal';
 
 const { useBreakpoint } = Grid;
@@ -363,9 +361,12 @@ export const NewsaleTable: React.FC<PropsType> = ({
           align="center"
           style={{ paddingBottom: 16 }}
         >
-          <Typography.Title level={5} style={{ margin: 0 }}>
-            Table
-          </Typography.Title>
+          {isSmOrBelow === false && (
+            <Typography.Title level={5} style={{ margin: 0 }}>
+              Table
+            </Typography.Title>
+          )}
+
           <div>
             <Space>
               <Button
@@ -584,14 +585,18 @@ export const NewsaleTable: React.FC<PropsType> = ({
       >
         <BasicTable
           api={'Product'}
-          displayData={[
-            'id',
-            'name',
-            'barcode',
-            'costPrice',
-            'retailPrice',
-            'wholesalePrice',
-          ]}
+          displayData={
+            isSmOrBelow
+              ? ['id', 'name', 'retailPrice']
+              : [
+                  'id',
+                  'name',
+                  'barcode',
+                  'costPrice',
+                  'retailPrice',
+                  'wholesalePrice',
+                ]
+          }
           fetch={async (url) => {
             const response = await Get(url);
             return response;

@@ -24,7 +24,7 @@ const Newsale = () => {
 
   return (
     <>
-      <PageHeader title="New Sale" />
+      <PageHeader title="Retail" />
 
       <NewsaleTable
         api={`Retail/GetByCartId?saleId=${id}`}

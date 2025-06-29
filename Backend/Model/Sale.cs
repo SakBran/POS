@@ -10,7 +10,7 @@ namespace Backend.Model
     {
 
         [Key]
-        public required int Id { get; set; }
+        public required string Id { get; set; }
 
         // Optional: For credit or wholesale customers
         public string? CustomerId { get; set; }
@@ -23,7 +23,10 @@ namespace Backend.Model
 
         // Financial fields
         public decimal Subtotal { get; set; }
+        public string DiscountType { get; set; } = "Fixed";
         public decimal Discount { get; set; }
+        public decimal Tax { get; set; }
+        public decimal DeliveryFee { get; set; }
         public decimal Total => Subtotal - Discount;
 
         public decimal AmountPaid { get; set; }

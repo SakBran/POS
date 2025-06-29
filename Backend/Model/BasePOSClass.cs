@@ -9,6 +9,6 @@ namespace Backend.Model
     {
         public string? StoreId { get; set; }
         public string? StoreName { get; set; }
-        public required string RootUserId { get; set; }
+        public string? RootUserId { get; set; }
     }
 }
