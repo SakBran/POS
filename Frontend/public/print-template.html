@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>POS Receipt</title>
+  <style>
+    @page {
+      margin: 0;
+    }
+
+    body {
+      font-family: monospace;
+      font-size: 12px;
+      margin: 0;
+      padding: 10px;
+    }
+
+    .receipt {
+      /* max-width: 250px; */
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #000;
+      box-sizing: border-box;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px dashed #000;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  {{PRINT_CONTENT}}
+
+  <script>
+    window.onload = function () {
+      window.print();
+      window.close();
+    };
+  </script>
+</body>
+
+</html>

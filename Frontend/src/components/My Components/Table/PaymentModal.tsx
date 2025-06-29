@@ -7,12 +7,16 @@ import React from 'react';
 interface Props {
   isPaymentModalOpen: boolean;
   setIsPaymentModalOpen: (value: React.SetStateAction<boolean>) => void;
+  isPaid: boolean;
+  setIsPaid: (value: React.SetStateAction<boolean>) => void;
   subTotal: number;
 }
 const APIURL = 'RetailSales/PaymentRecord';
 const PaymentModal = ({
   isPaymentModalOpen,
   setIsPaymentModalOpen,
+  isPaid,
+  setIsPaid,
   subTotal,
 }: Props) => {
   const { readOnly, id, action } = useFormhelper();
@@ -20,7 +24,13 @@ const PaymentModal = ({
   const { onFinish, writeLoading } = useFormActions(id, action, APIURL);
   const [loading, setLoading] = useState<boolean>(false);
   const modifiedOnFinish = (value: unknown) => {
-    onFinish(value);
+    try {
+      onFinish(value);
+      setIsPaid(true);
+      setIsPaymentModalOpen(false);
+    } catch (ex) {
+      console.log(ex);
+    }
   };
   useEffect(() => {
     setLoading(true);

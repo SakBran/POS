@@ -35,5 +35,16 @@ namespace Backend.Controllers.Sale.Retail.Sales
             await _context.SaveChangesAsync();
             return Ok(data);
         }
+
+        [HttpGet("GetByVoucherNo")]
+        public async Task<IActionResult> GetByVoucherNo(string id)
+        {
+            if (await _context.Sales.AnyAsync(x => x.Id == id))
+            {
+                return Ok(await _context.Sales.FirstOrDefaultAsync(x => x.Id == id));
+            }
+
+            return NotFound();
+        }
     }
 }

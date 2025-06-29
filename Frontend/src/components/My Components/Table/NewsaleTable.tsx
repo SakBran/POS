@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './style.css';
 
 import {
@@ -23,6 +23,7 @@ import { PaginationType } from '../../../types/PaginationType';
 import {
   DollarOutlined,
   PlusCircleOutlined,
+  PrinterOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
 // import * as XLSX from 'xlsx';
@@ -32,6 +33,7 @@ import Html5DectorModal from '../BarcodeDector/Html5Dector';
 import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from '../../../services/AxiosInstance';
 import PaymentModal from './PaymentModal';
+import PrintSection from './PrintSection';
 
 const { useBreakpoint } = Grid;
 export type TableFunctionType = (api: string) => Promise<PaginationType>;
@@ -105,6 +107,9 @@ export const NewsaleTable: React.FC<PropsType> = ({
   const isSmOrBelow = !screens.lg;
   const [url, setUrl] = useState('');
   const [total, setTotal] = useState<TotalValue>({ quantity: 0, amount: 0 });
+  const [isPaid, setIsPaid] = useState<boolean>(false);
+  const printRef = useRef<HTMLDivElement>(null);
+
   const handleSort = (column: string) => {
     setSortColumn(column);
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -225,6 +230,41 @@ export const NewsaleTable: React.FC<PropsType> = ({
     Task(QuantityId);
   };
 
+  const handlePrint = async () => {
+    if (!printRef.current) {
+      return;
+    }
+    const printContent = printRef.current.innerHTML;
+
+    // Load HTML template from public folder
+    const res = await window.fetch('/print-template.html');
+    const template = await res.text();
+
+    // Replace placeholder with actual invoice
+    const htmlContent = template.replace('{{PRINT_CONTENT}}', printContent);
+
+    const printWindow = window.open('', '', 'width=300,height=600');
+    printWindow?.document.write(htmlContent);
+    printWindow?.document.close();
+  };
+
+  const TaskToCheckPaid = React.useCallback(async () => {
+    try {
+      const response = await axiosInstance.get(
+        'RetailSales/GetByVoucherNo?id=' + salesId
+      );
+      const temp = response.data;
+      if (temp) {
+        setIsPaid(true);
+      } else {
+        setIsPaid(false);
+      }
+    } catch (ex) {
+      setIsPaid(false);
+      //console.log(ex);
+    }
+  }, []);
+
   //ဒီထဲကParameterက Dotnet Core ထဲကPagination Getနဲ့ညှိပေးထားတာ
   //တကယ်လို့ပြင်ချင်ရင် Parameter တွေပြင်သုံးပေါ့
   useEffect(() => {
@@ -259,6 +299,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
     const call = async () => {
       try {
         setData(await fetch(url));
+        await TaskToCheckPaid();
         setloading(false);
       } catch (ex) {
         setloading(false);
@@ -481,20 +522,33 @@ export const NewsaleTable: React.FC<PropsType> = ({
                 })}
                 <tr>
                   <td></td>
-                  <td>ပစ္စည်းအမျိုးအရေတွက် - {data.data.length} မျိုး</td>
+                  <td>ပစ္စည်းအမျိုးအရေတွက် - ({data.data.length}) မျိုး</td>
                   <td>စုစုပေါင်း</td>
                   <td>{total.quantity}</td>
                   <td>{total.amount}</td>
                   <td>
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        setIsPaymentModalOpen(true);
-                      }}
-                    >
-                      <DollarOutlined />
-                      ရှင်းမည်။
-                    </Button>
+                    {!isPaid && (
+                      <Button
+                        type="primary"
+                        onClick={() => {
+                          setIsPaymentModalOpen(true);
+                        }}
+                      >
+                        <DollarOutlined />
+                        ရှင်းမည်။
+                      </Button>
+                    )}
+                    {isPaid && (
+                      <Button
+                        type="primary"
+                        onClick={() => {
+                          handlePrint();
+                        }}
+                      >
+                        <PrinterOutlined />
+                        ပြေစာထုတ်မည်။
+                      </Button>
+                    )}
                   </td>
                 </tr>
               </tbody>
@@ -645,8 +699,14 @@ export const NewsaleTable: React.FC<PropsType> = ({
       <PaymentModal
         isPaymentModalOpen={isPaymentModalOpen}
         setIsPaymentModalOpen={setIsPaymentModalOpen}
+        setIsPaid={setIsPaid}
+        isPaid={isPaid}
         subTotal={total.amount}
       ></PaymentModal>
+
+      {/* Hidden or styled section for print */}
+      <PrintSection printRef={printRef}></PrintSection>
+
       <ToastContainer />
     </>
   );
