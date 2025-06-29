@@ -20,6 +20,7 @@ namespace API.DBContext
         public DbSet<ChatModel> ChatModels { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<SaleDetail> SaleDetails { get; set; }
+        public DbSet<Sale> Sales { get; set; }
 
 
 

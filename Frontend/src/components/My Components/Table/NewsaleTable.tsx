@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './style.css';
 
-import TableAction from '../TableAction/TableAction';
 import {
   Button,
   Card,
@@ -26,20 +25,17 @@ import {
   PlusCircleOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 import { BasicTable } from './BasicTable';
 import { Get } from '../../../services/BasicHttpServices';
 import Html5DectorModal from '../BarcodeDector/Html5Dector';
 import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from '../../../services/AxiosInstance';
+import BasicForm from '../Form/BasicForm';
+import { AjaxButton } from '../AjaxButton/AjaxButton';
+import PaymentModal from './PaymentModal';
 
 const { useBreakpoint } = Grid;
-
-//ဒီနေရမှာ Ant Designက Table သုံးလဲရတယ် Depedencyနဲနိုင်သမျှနဲအောင် လုပ်သာအကောင်းဆုံးပဲ
-//Fetch လုပ်တာလဲ ပြချင်တဲ့ Column ကို Display Dataထဲထည့်ပေးရုံပဲ
-//Fetch ကထွက်လာတဲ့ Databindingကလဲ အဆင်ပြေအောင် Componentအပြင်ပဲထုတ်ထားတယ်
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TableFunctionType = (api: string) => Promise<PaginationType>;
 interface PropsType {
   displayData: string[];
@@ -101,7 +97,9 @@ export const NewsaleTable: React.FC<PropsType> = ({
   //For Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenForBarcode, setIsModalOpenForBarcode] = useState(false);
-  const [isQuantityModalOpen, setisQuantityModalOpen] = useState(false);
+  const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
   const [reload, setReload] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(0);
   const [quantityId, setQuantityId] = useState<string>('');
@@ -220,7 +218,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
           ...data,
           data: filteredData,
         });
-        setisQuantityModalOpen(false);
+        setIsQuantityModalOpen(false);
       } catch (err) {
         console.log(err);
         // Error is already handled in toast
@@ -288,11 +286,11 @@ export const NewsaleTable: React.FC<PropsType> = ({
     }
   }, [data]);
 
-  const exportToExcel = () => {
-    const table = document.getElementById('reportTable');
-    const wb = XLSX.utils.table_to_book(table, { sheet: 'SheetJS' });
-    XLSX.writeFile(wb, 'Report.xlsx');
-  };
+  // const exportToExcel = () => {
+  //   const table = document.getElementById('reportTable');
+  //   const wb = XLSX.utils.table_to_book(table, { sheet: 'SheetJS' });
+  //   XLSX.writeFile(wb, 'Report.xlsx');
+  // };
 
   const { Option } = Select;
 
@@ -430,6 +428,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
                       const cellValue = row[display];
                       return (
                         <Tooltip
+                          key={i}
                           placement="topLeft"
                           title="Click to fix quantity"
                         >
@@ -438,7 +437,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
                             onClick={() => {
                               setQuantityId(row['id']);
                               setQuantity(+cellValue?.toString());
-                              setisQuantityModalOpen(true);
+                              setIsQuantityModalOpen(true);
                             }}
                           >
                             <Typography.Link
@@ -455,7 +454,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
                     } else if (display === 'total') {
                       const unitPrice = +row['unitPrice'];
                       const quantity = +row['quantity'];
-                      return <td>{unitPrice * quantity}</td>;
+                      return <td key={i}>{unitPrice * quantity}</td>;
                     } else {
                       return null;
                     }
@@ -480,26 +479,16 @@ export const NewsaleTable: React.FC<PropsType> = ({
                   );
                 })}
                 <tr>
+                  <td></td>
                   <td>ပစ္စည်းအမျိုးအရေတွက် - {data.data.length} မျိုး</td>
-                  <td colSpan={2}>
-                    <Typography.Text
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignContent: 'center',
-                      }}
-                    >
-                      {' '}
-                      စုစုပေါင်း
-                    </Typography.Text>
-                  </td>
+                  <td>စုစုပေါင်း</td>
                   <td>{total.quantity}</td>
                   <td>{total.amount}</td>
                   <td>
                     <Button
                       type="primary"
                       onClick={() => {
-                        //setIsModalOpen(true);
+                        setIsPaymentModalOpen(true);
                       }}
                     >
                       <DollarOutlined />
@@ -611,10 +600,6 @@ export const NewsaleTable: React.FC<PropsType> = ({
         />
       </Modal>
 
-      {/* <BarcodeScannerModal
-        isModalOpenForBarcode={isModalOpenForBarcode}
-        setIsModalOpenForBarcode={setIsModalOpenForBarcode}
-      ></BarcodeScannerModal> */}
       <Html5DectorModal
         isOpen={isModalOpenForBarcode}
         setIsOpen={setIsModalOpenForBarcode}
@@ -636,17 +621,9 @@ export const NewsaleTable: React.FC<PropsType> = ({
         }}
         onCancel={() => {
           // handle close modal logic here
-          setisQuantityModalOpen(false);
+          setIsQuantityModalOpen(false);
         }}
       >
-        {/* <Form layout="vertical">
-          <Form.Item
-            label="New Quantity"
-            name="quantity"
-            rules={[
-              { required: true, message: 'Please input the new quantity!' },
-            ]}
-          > */}
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <Space>
             Enter Quantity:
@@ -658,10 +635,13 @@ export const NewsaleTable: React.FC<PropsType> = ({
             />
           </Space>
         </div>
-
-        {/* </Form.Item>
-        </Form> */}
       </Modal>
+
+      <PaymentModal
+        isPaymentModalOpen={isPaymentModalOpen}
+        setIsPaymentModalOpen={setIsPaymentModalOpen}
+        subTotal={total.amount}
+      ></PaymentModal>
       <ToastContainer />
     </>
   );
