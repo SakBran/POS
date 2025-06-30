@@ -10,6 +10,8 @@ interface Props {
   deliveryFee: number;
   discount: number;
   tax: number;
+  paid: number | null;
+  balance: number | null;
 }
 
 export interface SaleDetail {
@@ -38,6 +40,8 @@ const PrintSection = ({
   deliveryFee,
   discount,
   tax,
+  paid,
+  balance,
 }: Props) => {
   return (
     <div ref={printRef} style={{ display: 'none' }}>
@@ -87,6 +91,17 @@ const PrintSection = ({
         <div className="item bold">
           <span>Total</span>
           <span>{total} MMK</span>
+        </div>
+
+        <hr />
+        <div className="item bold">
+          <span>Paid</span>
+          <span>{paid} MMK</span>
+        </div>
+
+        <div className="item bold">
+          <span>Left</span>
+          <span>{balance} MMK</span>
         </div>
 
         <hr />

@@ -781,6 +781,8 @@ export const NewsaleTable: React.FC<PropsType> = ({
         deliveryFee={sale.deliveryFee}
         discount={sale.discount}
         tax={sale.tax}
+        paid={sale.amountPaid}
+        balance={sale.balance}
       ></PrintSection>
 
       <ToastContainer />
