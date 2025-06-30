@@ -27,7 +27,7 @@ namespace Backend.Model
         public decimal Discount { get; set; }
         public decimal Tax { get; set; }
         public decimal DeliveryFee { get; set; }
-        public decimal Total => Subtotal - Discount;
+        public decimal Total => Subtotal + DeliveryFee + Tax - Discount;
 
         public decimal AmountPaid { get; set; }
         public decimal Balance => Total - AmountPaid;

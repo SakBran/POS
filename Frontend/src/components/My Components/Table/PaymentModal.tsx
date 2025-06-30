@@ -6,26 +6,32 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import { Sale } from './NewsaleTable';
 import axiosInstance from '../../../services/AxiosInstance';
+import useFormLoad from '../../../hooks/useFormload';
 interface Props {
   isPaymentModalOpen: boolean;
   setIsPaymentModalOpen: (value: React.SetStateAction<boolean>) => void;
   isPaid: boolean;
   setIsPaid: (value: React.SetStateAction<boolean>) => void;
   subTotal: number;
+  sale: Sale;
   setSale: (value: React.SetStateAction<Sale>) => void;
 }
 const APIURL = 'RetailSales/PaymentRecord';
 const PaymentModal = ({
   isPaymentModalOpen,
   setIsPaymentModalOpen,
-  isPaid,
   setIsPaid,
   subTotal,
+  sale,
   setSale,
 }: Props) => {
   const { readOnly, id } = useFormhelper();
   const formRef = React.useRef<FormInstance>(null);
-
+  // const { formRef, loading, setLoading } = useFormLoad(
+  //   id,
+  //   'Edit',
+  //   'RetailSales/GetByVoucherNo'
+  // );
   const [loading, setLoading] = useState<boolean>(false);
   const modifiedOnFinish = (value: unknown) => {
     setLoading(true);
@@ -49,22 +55,29 @@ const PaymentModal = ({
   };
   useEffect(() => {
     setLoading(true);
-    formRef.current?.setFieldValue('subtotal', +subTotal);
-    formRef.current?.setFieldValue('voucherNumber', id);
-    formRef.current?.setFieldValue('paymentMethod', 'cash');
-    formRef.current?.setFieldValue('discount', 0);
-    formRef.current?.setFieldValue('amountPaid', 0);
-    formRef.current?.setFieldValue(
-      'saleDate',
-      new Date().toISOString().slice(0, 10)
-    );
+    if (sale) {
+      formRef.current?.setFieldsValue(sale);
+      formRef.current?.setFieldValue('saleDate', sale.saleDate.slice(0, 10));
+    } else {
+      formRef.current?.setFieldValue('subtotal', +subTotal);
+      formRef.current?.setFieldValue('voucherNumber', id);
+      formRef.current?.setFieldValue('id', id);
+      formRef.current?.setFieldValue('paymentMethod', 'cash');
+      formRef.current?.setFieldValue('discount', 0);
+      formRef.current?.setFieldValue('amountPaid', 0);
+      formRef.current?.setFieldValue(
+        'saleDate',
+        new Date().toISOString().slice(0, 10)
+      );
+    }
+
     totalHandler();
-  }, [isPaymentModalOpen]);
+  }, [isPaymentModalOpen, sale]);
 
   const totalHandler = () => {
     const subTotal = +formRef.current?.getFieldValue('subtotal') || 0;
     const tax = +formRef.current?.getFieldValue('tax') || 0;
-    const deliveryFee = +formRef.current?.getFieldValue('deliveryFees') || 0;
+    const deliveryFee = +formRef.current?.getFieldValue('deliveryFee') || 0;
     const discount = formRef.current?.getFieldValue('discount') || 0;
 
     let discountValue = 0;
@@ -116,6 +129,9 @@ const PaymentModal = ({
         readOnly={loading || readOnly}
         loading={loading}
       >
+        <Form.Item label="id" name="id" hidden>
+          <Input type="hidden" readOnly />
+        </Form.Item>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12}>
             <Form.Item label="SaleDate" name="saleDate">
@@ -196,7 +212,7 @@ const PaymentModal = ({
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
-            <Form.Item label="Delivery Fee" name="deliveryFees">
+            <Form.Item label="Delivery Fee" name="deliveryFee">
               <Input type="number" onChange={totalHandler} />
             </Form.Item>
           </Col>

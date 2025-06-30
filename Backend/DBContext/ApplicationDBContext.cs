@@ -44,6 +44,27 @@ namespace API.DBContext
             modelBuilder.Entity<SystemSetting>()
                 .Property(e => e.OnlineFees)
                 .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.CostPrice).HasPrecision(18, 4);
+                entity.Property(p => p.RetailPrice).HasPrecision(18, 4);
+                entity.Property(p => p.WholesalePrice).HasPrecision(18, 4);
+            });
+
+            modelBuilder.Entity<Sale>(entity =>
+            {
+                entity.Property(p => p.AmountPaid).HasPrecision(18, 4);
+                entity.Property(p => p.DeliveryFee).HasPrecision(18, 4);
+                entity.Property(p => p.Discount).HasPrecision(18, 4);
+                entity.Property(p => p.Subtotal).HasPrecision(18, 4);
+                entity.Property(p => p.Tax).HasPrecision(18, 4);
+            });
+
+            modelBuilder.Entity<SaleDetail>(entity =>
+            {
+                entity.Property(p => p.UnitPrice).HasPrecision(18, 4);
+            });
         }
     }
 }

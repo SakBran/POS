@@ -179,9 +179,9 @@ export const NewsaleTable: React.FC<PropsType> = ({
         await toast.promise(
           axiosInstance.post<AddRequest>('Retail/AddByTable', postdata),
           {
-            pending: 'Loading user…',
-            success: 'Loaded user successfully',
-            error: 'Couldn’t load user!',
+            pending: 'Loading…',
+            success: 'Added successfully',
+            error: 'Couldn’t add product!',
           }
         );
       };
@@ -301,7 +301,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
   const TaskToCheckPaid = React.useCallback(async () => {
     try {
       const response = await axiosInstance.get(
-        'RetailSales/GetByVoucherNo?id=' + salesId
+        'RetailSales/GetByVoucherNo/' + salesId
       );
       const temp = response.data;
       if (temp) {
@@ -766,6 +766,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
         setIsPaid={setIsPaid}
         isPaid={isPaid}
         subTotal={total.amount}
+        sale={sale}
         setSale={setSale}
       ></PaymentModal>
 
