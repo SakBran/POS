@@ -1,12 +1,10 @@
 import { Col, Form, FormInstance, Input, Modal, Row, Select } from 'antd';
 import BasicForm from '../Form/BasicForm';
-import useFormActions from '../../../hooks/useFormActions';
 import useFormhelper from '../../../hooks/useFormhelper';
 import { useEffect, useState } from 'react';
 import React from 'react';
 import { Sale } from './NewsaleTable';
 import axiosInstance from '../../../services/AxiosInstance';
-import useFormLoad from '../../../hooks/useFormload';
 interface Props {
   isPaymentModalOpen: boolean;
   setIsPaymentModalOpen: (value: React.SetStateAction<boolean>) => void;
@@ -55,13 +53,13 @@ const PaymentModal = ({
   };
   useEffect(() => {
     setLoading(true);
+
     if (sale) {
       formRef.current?.setFieldsValue(sale);
       formRef.current?.setFieldValue('saleDate', sale.saleDate.slice(0, 10));
     } else {
       formRef.current?.setFieldValue('subtotal', +subTotal);
-      formRef.current?.setFieldValue('voucherNumber', id);
-      formRef.current?.setFieldValue('id', id);
+
       formRef.current?.setFieldValue('paymentMethod', 'cash');
       formRef.current?.setFieldValue('discount', 0);
       formRef.current?.setFieldValue('amountPaid', 0);
@@ -70,7 +68,8 @@ const PaymentModal = ({
         new Date().toISOString().slice(0, 10)
       );
     }
-
+    formRef.current?.setFieldValue('voucherNumber', id);
+    formRef.current?.setFieldValue('id', id);
     totalHandler();
   }, [isPaymentModalOpen, sale]);
 
