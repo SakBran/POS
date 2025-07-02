@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { List, InputNumber, Button, Typography, Divider, Row, Col } from 'antd';
 
 const { Text } = Typography;
@@ -14,16 +14,13 @@ export type VariantGroup = {
   items: Variant[];
 };
 
-const initialData: VariantGroup[] = [
-  { title: 'Small', items: [{ name: 'Red', price: 1000, stock: 10 }] },
-  { title: 'Large', items: [{ name: 'Blue', price: 1200, stock: 5 }] },
-];
-
 interface Props {
   variants: VariantGroup[];
   setVariants: React.Dispatch<React.SetStateAction<VariantGroup[]>>;
 }
+
 const VariantEditor = ({ variants, setVariants }: Props) => {
+  // update single item
   const updateItem = (
     groupIndex: number,
     itemIndex: number,
@@ -35,9 +32,30 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
     setVariants(newData);
   };
 
+  // delete single item
   const handleDelete = (groupIndex: number, itemIndex: number) => {
     const newData = [...variants];
     newData[groupIndex].items.splice(itemIndex, 1);
+    setVariants(newData);
+  };
+
+  // apply one price to all items in a group
+  const applyAllPrice = (groupIndex: number, value: number = 0) => {
+    const newData = [...variants];
+    newData[groupIndex].items = newData[groupIndex].items.map((item) => ({
+      ...item,
+      price: value,
+    }));
+    setVariants(newData);
+  };
+
+  // apply one stock to all items in a group
+  const applyAllStock = (groupIndex: number, value: number = 0) => {
+    const newData = [...variants];
+    newData[groupIndex].items = newData[groupIndex].items.map((item) => ({
+      ...item,
+      stock: value,
+    }));
     setVariants(newData);
   };
 
@@ -47,7 +65,29 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
         <div key={group.title} style={{ marginBottom: 24 }}>
           <Divider orientation="left">{group.title}</Divider>
 
-          {/* Header row - only visible on larger screens */}
+          {/* “Apply to all” row */}
+          <Row gutter={[8, 8]} style={{ padding: '0 16px', marginBottom: 8 }}>
+            <Col xs={0} sm={8} />
+            <Col xs={24} sm={6}>
+              <InputNumber
+                placeholder="All Price"
+                addonBefore="MMK"
+                style={{ width: '100%' }}
+                onChange={(v) => applyAllPrice(groupIndex, Number(v) || 0)}
+              />
+            </Col>
+            <Col xs={24} sm={6}>
+              <InputNumber
+                placeholder="All Stock"
+                addonBefore="Qty"
+                style={{ width: '100%' }}
+                onChange={(v) => applyAllStock(groupIndex, Number(v) || 0)}
+              />
+            </Col>
+            <Col xs={0} sm={4} />
+          </Row>
+
+          {/* Header row */}
           <Row
             style={{
               padding: '8px 16px',
@@ -65,9 +105,10 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
             <Col xs={0} sm={6}>
               Stock
             </Col>
-            <Col xs={0} sm={4}></Col>
+            <Col xs={0} sm={4} />
           </Row>
 
+          {/* Variant list */}
           <List
             bordered
             dataSource={group.items}
