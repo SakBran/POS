@@ -27,6 +27,7 @@ import Newsale from '../pages/Newsale/Newsale.tsx';
 import ProductList from '../pages/Product/ProductList.tsx';
 import ProductPage from '../pages/Product/ProductPage.tsx';
 import GenerateGUIDPage from '../pages/Newsale/GenerateGUIDPage.tsx';
+import ProudctStepForm from '../pages/Product/ProductStepForm.tsx';
 
 // Custom scroll restoration function
 export const ScrollToTop: React.FC = () => {
@@ -258,23 +259,23 @@ const router = createBrowserRouter([
       },
       {
         path: 'New',
-        element: <ProductPage />,
+        element: <ProudctStepForm />,
       },
       {
         path: 'Edit/:id',
-        element: <ProductPage />,
+        element: <ProudctStepForm />,
       },
       {
         path: 'Delete/:id',
-        element: <ProductPage />,
+        element: <ProudctStepForm />,
       },
       {
         path: 'ToggleActive/:id',
-        element: <ProductPage />,
+        element: <ProudctStepForm />,
       },
       {
         path: 'Detail/:id',
-        element: <ProductPage />,
+        element: <ProudctStepForm />,
       },
     ],
   },

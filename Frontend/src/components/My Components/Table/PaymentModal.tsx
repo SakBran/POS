@@ -54,7 +54,7 @@ const PaymentModal = ({
   useEffect(() => {
     setLoading(true);
 
-    if (sale) {
+    if (sale.id !== '') {
       formRef.current?.setFieldsValue(sale);
       formRef.current?.setFieldValue('saleDate', sale.saleDate.slice(0, 10));
     } else {

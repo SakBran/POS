@@ -21,6 +21,8 @@ namespace API.DBContext
         public DbSet<Product> Products { get; set; }
         public DbSet<SaleDetail> SaleDetails { get; set; }
         public DbSet<Sale> Sales { get; set; }
+        public DbSet<SizeAttributes> SizeAttributes { get; set; }
+        public DbSet<ColourAttrributes> ColourAttrributes { get; set; }
 
 
 

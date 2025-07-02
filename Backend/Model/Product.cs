@@ -15,6 +15,8 @@ namespace Backend.Model
         [Key]
         public string Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Image { get; set; } = string.Empty;
         public string Barcode { get; set; } = string.Empty;
         public string? CategoryId { get; set; }
 
@@ -27,5 +29,8 @@ namespace Backend.Model
         public string CreatedUserId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+
+        public bool HasVariants { get; set; } = false;
+        public string? ParentId { get; set; }
     }
 }
