@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Backend.Model
 {
-    public class Product
+    public class Product : BasePOSClass
     {
         public Product()
         {
@@ -31,6 +31,8 @@ namespace Backend.Model
         public DateTime? UpdatedAt { get; set; }
 
         public bool HasVariants { get; set; } = false;
+        public int Stock { get; set; } = 0;
+        public string? Title { get; set; }
         public string? ParentId { get; set; }
     }
 }
