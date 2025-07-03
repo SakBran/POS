@@ -121,7 +121,8 @@ namespace Backend.Controllers
             await _context.AddRangeAsync(ProductListToSave);
 
             await _context.SaveChangesAsync();
-            return Ok();
+            var dto = await GetVariantsForProduct(id);
+            return Ok(dto);
         }
 
         [HttpGet("GetProductWithVariants/{id}")]
