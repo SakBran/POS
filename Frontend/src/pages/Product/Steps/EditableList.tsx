@@ -61,6 +61,7 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
 
   // apply one stock to all items in a group
   const applyAllStock = (groupIndex: number, value: number = 0) => {
+    console.log('Apply all stock');
     const newData = [...variants];
     newData[groupIndex].items = newData[groupIndex].items.map((item) => ({
       ...item,
@@ -126,7 +127,7 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
               <List.Item style={{ padding: '12px 16px' }}>
                 <Row style={{ width: '100%' }} gutter={[8, 8]} align="middle">
                   <Col xs={24} sm={8}>
-                    <Form.Item name={item.name}>
+                    <Form.Item>
                       <Text>{item.name}</Text>
                     </Form.Item>
                   </Col>
@@ -144,7 +145,7 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
                     </Form.Item>
                   </Col>
                   <Col xs={24} sm={6}>
-                    <Form.Item name={item.stock}>
+                    <Form.Item>
                       <InputNumber
                         addonBefore="Qty"
                         value={item.stock}
