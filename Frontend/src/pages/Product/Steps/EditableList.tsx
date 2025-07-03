@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   List,
   InputNumber,
@@ -9,11 +8,11 @@ import {
   Col,
   Form,
 } from 'antd';
-import FormItem from 'antd/es/form/FormItem';
 
 const { Text } = Typography;
 
 export type Variant = {
+  id?: string;
   name: string;
   price: number;
   stock: number;

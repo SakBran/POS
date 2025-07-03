@@ -28,6 +28,7 @@ namespace Backend.Controllers.Products.Request
 
     public class VariantItemDto
     {
+        public string? Id { get; set; }
         public string? Name { get; set; } // Size
         public decimal Price { get; set; }
         public int Stock { get; set; }

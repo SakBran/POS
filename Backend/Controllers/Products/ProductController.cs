@@ -156,6 +156,7 @@ namespace Backend.Controllers
                     Title = g.Key,                     // Colour name
                     Items = g.Select(p => new VariantItemDto
                     {
+                        Id = p.Id,
                         Name = p.Name,                // Size name
                         Price = p.RetailPrice,         // or choose the right price field
                         Stock = p.Stock
