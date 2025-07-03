@@ -198,8 +198,6 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
   };
 
   const onFinish = (values: unknown) => {
-    console.log(values);
-    console.log(JSON.stringify(data));
     if (id) {
       handleAddRequest(id, data, setData);
     }
