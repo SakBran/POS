@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Controllers;
 using API.DBContext;
+using API.Model;
 using Backend.Controllers.Products.Request;
 using Backend.Interface;
 using Backend.Model;
@@ -24,6 +25,28 @@ namespace Backend.Controllers
         {
             _context = context;
             _loginCredential = loginCredential;
+        }
+        [HttpGet]
+        [Authorize]
+        public override async Task<ActionResult<ApiResult<Product>>> Get(
+                  int pageIndex = 0,
+                  int pageSize = 10,
+                  string? sortColumn = null,
+                  string? sortOrder = null,
+                  string? filterColumn = null,
+                  string? filterQuery = null)
+        {
+
+            var loginUserId = await _loginCredential.GetLoginUserId();
+            var query = _context.Products.Where(x => x.RootUserId == loginUserId && x.ParentId == null);
+            return await ApiResult<Product>.CreateAsync(
+                    query,
+                    pageIndex,
+                    pageSize,
+                    sortColumn,
+                    sortOrder,
+                    filterColumn,
+                    filterQuery);
         }
 
         [Authorize]
