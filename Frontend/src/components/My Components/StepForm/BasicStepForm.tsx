@@ -15,6 +15,7 @@ interface BasicStepFormProps extends Omit<FormProps, 'children'> {
   setCurrent: (current: number) => void;
   APIURL: string;
   finalStep?: boolean;
+  onFinishCustomize?: (values: unknown) => void;
 }
 const BasicStepForm: React.FC<BasicStepFormProps> = ({
   children,
@@ -22,6 +23,7 @@ const BasicStepForm: React.FC<BasicStepFormProps> = ({
   setCurrent,
   APIURL,
   finalStep = false,
+  onFinishCustomize,
 }) => {
   const stepContext = useStepContext();
   const { readOnly, id, action } = useFormhelper();
@@ -59,7 +61,7 @@ const BasicStepForm: React.FC<BasicStepFormProps> = ({
   return (
     <BasicForm
       formRef={formRef}
-      onFinish={OnStepFinish}
+      onFinish={onFinishCustomize ? onFinishCustomize : OnStepFinish}
       readOnly={loading ? loading : writeLoading ? writeLoading : readOnly}
       loading={loading}
       noStyle={true}

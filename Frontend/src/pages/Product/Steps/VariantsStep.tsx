@@ -10,14 +10,29 @@ type StepProps = {
   setCurrent: (current: number) => void;
 };
 
+interface variantInput {
+  [key: string]: string;
+}
+
+interface VariantsStepDto {
+  hasVariants: boolean;
+  variantInputs: variantInput;
+  variants: VariantGroup[];
+}
+const defaultData: VariantsStepDto = {
+  hasVariants: false,
+  variantInputs: {},
+  variants: [],
+};
+
 const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
   const [options, setOptions] = useState(['Colour', 'Size']);
   const [selected, setSelected] = useState<string[]>([]);
-  const [variantInputs, setVariantInputs] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [data, setData] = useState<VariantsStepDto>(defaultData);
+  const setVariants = (value: VariantGroup[]) => {
+    setData((prev) => ({ ...prev, variants: value }));
+  };
   const [newOption, setNewOption] = useState('');
-  const [variants, setVarinats] = useState<VariantGroup[]>([]);
 
   const handleAdd = () => {
     if (newOption && !options.includes(newOption)) {
@@ -28,14 +43,19 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
   };
 
   const onInputChange = (key: string, value: string) => {
-    setVariantInputs((prev) => ({ ...prev, [key]: value }));
+    setData((prev) => ({
+      ...prev,
+      variantInputs: {
+        ...prev.variantInputs,
+        [key]: value,
+      },
+    }));
   };
-
   // 🔸 watch the HasVariants field
-  const [hasVariants, setHasvariants] = useState<boolean>(false);
+  //const [hasVariants, setHasvariants] = useState<boolean>(false);
 
   const generateCombinations = async (): Promise<void> => {
-    const valueLists: string[][] = Object.entries(variantInputs)
+    const valueLists: string[][] = Object.entries(data.variantInputs)
       .filter(([key]) => selected.includes(key))
       .map(([, value]) =>
         value
@@ -110,24 +130,34 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
     }).then((result) => {
       if (result.isConfirmed) {
         console.log('User confirmed!');
-        setVarinats(data);
-        //setItems(combinations);
-        // Do your logic here
+        setVariants(data);
       } else {
         console.log('User cancelled');
       }
     });
   };
 
+  const onFinish = (values: unknown) => {
+    console.log(values);
+    console.log(JSON.stringify(data));
+  };
+
   return (
-    <BasicStepForm current={current} setCurrent={setCurrent} APIURL="Product">
+    <BasicStepForm
+      onFinishCustomize={onFinish}
+      current={current}
+      setCurrent={setCurrent}
+      APIURL="Product"
+    >
       <Form.Item
         label="Has Variants"
         name="HasVariants"
-        initialValue={hasVariants}
+        initialValue={data.hasVariants}
       >
         <Radio.Group
-          onChange={(e) => setHasvariants(e.target.value)}
+          onChange={(e) =>
+            setData((prev) => ({ ...prev, hasVariants: e.target.value }))
+          }
           options={[
             { value: true, label: 'Yes' },
             { value: false, label: 'No' },
@@ -136,7 +166,7 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
       </Form.Item>
 
       {/* 🔸 show this block only if Yes is selected */}
-      {hasVariants && (
+      {data.hasVariants && (
         <div>
           <Form.Item label="Variants" name="variants">
             <Checkbox.Group
@@ -152,7 +182,7 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
                       <Form.Item name={item + 'Values'}>
                         <Input
                           placeholder={`Enter value for ${item}`}
-                          value={variantInputs[item] || ''}
+                          value={data.variantInputs[item] || ''}
                           onChange={(e) => onInputChange(item, e.target.value)}
                           style={{ marginTop: 8 }}
                         />
@@ -186,8 +216,8 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
           </Form.Item>
           <Form.Item>
             <VariantEditor
-              variants={variants}
-              setVariants={setVarinats}
+              variants={data.variants}
+              setVariants={setVariants}
             ></VariantEditor>
           </Form.Item>
         </div>

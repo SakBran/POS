@@ -1,5 +1,15 @@
 import React from 'react';
-import { List, InputNumber, Button, Typography, Divider, Row, Col } from 'antd';
+import {
+  List,
+  InputNumber,
+  Button,
+  Typography,
+  Divider,
+  Row,
+  Col,
+  Form,
+} from 'antd';
+import FormItem from 'antd/es/form/FormItem';
 
 const { Text } = Typography;
 
@@ -16,7 +26,7 @@ export type VariantGroup = {
 
 interface Props {
   variants: VariantGroup[];
-  setVariants: React.Dispatch<React.SetStateAction<VariantGroup[]>>;
+  setVariants: (value: VariantGroup[]) => void;
 }
 
 const VariantEditor = ({ variants, setVariants }: Props) => {
@@ -116,29 +126,35 @@ const VariantEditor = ({ variants, setVariants }: Props) => {
               <List.Item style={{ padding: '12px 16px' }}>
                 <Row style={{ width: '100%' }} gutter={[8, 8]} align="middle">
                   <Col xs={24} sm={8}>
-                    <Text>{item.name}</Text>
+                    <Form.Item name={item.name}>
+                      <Text>{item.name}</Text>
+                    </Form.Item>
                   </Col>
                   <Col xs={24} sm={6}>
-                    <InputNumber
-                      addonBefore="MMK"
-                      value={item.price}
-                      min={0}
-                      style={{ width: '100%' }}
-                      onChange={(value) =>
-                        updateItem(groupIndex, itemIndex, 'price', value || 0)
-                      }
-                    />
+                    <Form.Item>
+                      <InputNumber
+                        addonBefore="MMK"
+                        value={item.price}
+                        min={0}
+                        style={{ width: '100%' }}
+                        onChange={(value) =>
+                          updateItem(groupIndex, itemIndex, 'price', value || 0)
+                        }
+                      />
+                    </Form.Item>
                   </Col>
                   <Col xs={24} sm={6}>
-                    <InputNumber
-                      addonBefore="Qty"
-                      value={item.stock}
-                      min={0}
-                      style={{ width: '100%' }}
-                      onChange={(value) =>
-                        updateItem(groupIndex, itemIndex, 'stock', value || 0)
-                      }
-                    />
+                    <Form.Item name={item.stock}>
+                      <InputNumber
+                        addonBefore="Qty"
+                        value={item.stock}
+                        min={0}
+                        style={{ width: '100%' }}
+                        onChange={(value) =>
+                          updateItem(groupIndex, itemIndex, 'stock', value || 0)
+                        }
+                      />
+                    </Form.Item>
                   </Col>
                   <Col xs={24} sm={4}>
                     <Button
