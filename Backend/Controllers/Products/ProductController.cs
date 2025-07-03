@@ -87,7 +87,16 @@ namespace Backend.Controllers
                         VariantKey = kv.Key,      // "Colour"
                         VariantInputs = kv.Value     // "Red,Green,Blue"
                     };
-                    vinputList.Add(vi);
+                    var isV_Exist = await _context.VariantInputs.Where(x => x.VariantKey == vi.VariantKey && x.ProductId == vi.ProductId).FirstOrDefaultAsync();
+                    if (isV_Exist != null)
+                    {
+                        isV_Exist.VariantInputs = vi.VariantInputs;
+                    }
+                    else
+                    {
+                        vinputList.Add(vi);
+                    }
+
                 }
             }
             await _context.VariantInputs.AddRangeAsync(vinputList);
