@@ -98,14 +98,24 @@ namespace Backend.Controllers
 
                 foreach (var value in Variant.Items)
                 {
-                    var p = new Product();
-                    p.ParentId = product.Id;
-                    p.Title = Variant.Title;
-                    p.Name = value?.Name ?? "";
-                    p.RetailPrice = value?.Price ?? product.RetailPrice;
-                    p.WholesalePrice = value?.Price ?? product.WholesalePrice;
-                    p.Stock = value?.Stock ?? 0;
-                    ProductListToSave.Add(p);
+                    var existingProduct = await _context.Products.Where(x => x.Id == value.Id).FirstOrDefaultAsync();
+                    if (existingProduct != null)
+                    {
+                        existingProduct.Stock = value.Stock;
+                        existingProduct.RetailPrice = value?.Price ?? product.RetailPrice;
+                        existingProduct.WholesalePrice = value?.Price ?? product.WholesalePrice;
+                    }
+                    else
+                    {
+                        var p = new Product();
+                        p.ParentId = product.Id;
+                        p.Title = Variant.Title;
+                        p.Name = value?.Name ?? "";
+                        p.RetailPrice = value?.Price ?? product.RetailPrice;
+                        p.WholesalePrice = value?.Price ?? product.WholesalePrice;
+                        p.Stock = value?.Stock ?? 0;
+                        ProductListToSave.Add(p);
+                    }
                 }
             }
             await _context.AddRangeAsync(ProductListToSave);
@@ -138,9 +148,10 @@ namespace Backend.Controllers
 
             // Build the dictionary: { "Colour": "Red,Green,Blue", ... }
             var variantInputsDict = inputs
+                .GroupBy(vi => vi.VariantKey!)
                 .ToDictionary(
-                    vi => vi.VariantKey!,
-                    vi => vi.VariantInputs!
+                    g => g.Key,
+                    g => string.Join(",", g.Select(x => x.VariantInputs))
                 );
 
             // 2. Fetch all child products you saved as variants
