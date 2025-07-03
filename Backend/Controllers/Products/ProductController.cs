@@ -8,6 +8,7 @@ using Backend.Controllers.Products.Request;
 using Backend.Interface;
 using Backend.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +26,44 @@ namespace Backend.Controllers
             _loginCredential = loginCredential;
         }
 
-        [HttpPut("Variants")]
+        [Authorize]
+        [HttpPost]
+        public override async Task<ActionResult<Product>> PostData(Product data)
+        {
+            var loginUserId = await _loginCredential.GetLoginUserId();
+            data.RootUserId = loginUserId;
+            await _context.Products.AddAsync(data);
+            await _context.SaveChangesAsync();
+            return Ok(data);
+        }
+
+        [Authorize]
+        [HttpPut("{id}")]
+        public override async Task<IActionResult> PutData(string id, Product obj)
+        {
+            var loginUserId = await _loginCredential.GetLoginUserId();
+            obj.RootUserId = loginUserId;
+            var oldData = await _context.FindAsync<Product>(id);
+            if (oldData != null)
+            {
+                _context.Entry(oldData).State = EntityState.Detached;
+            }
+
+            _context.Entry(obj).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Concurrency error occurred.");
+            }
+
+            return Ok(obj);
+        }
+
+        [HttpPut("Variants/{id}")]
         [Authorize]
         public async Task<IActionResult> Variants(string id, VariantDto postData)
         {

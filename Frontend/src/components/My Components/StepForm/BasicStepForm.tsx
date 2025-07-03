@@ -1,4 +1,4 @@
-import { Form, FormProps } from 'antd';
+import { Form, FormInstance, FormProps } from 'antd';
 import useFormActions from '../../../hooks/useFormActions';
 import useFormhelper from '../../../hooks/useFormhelper';
 import useFormLoad from '../../../hooks/useFormload';
@@ -16,6 +16,7 @@ interface BasicStepFormProps extends Omit<FormProps, 'children'> {
   APIURL: string;
   finalStep?: boolean;
   onFinishCustomize?: (values: unknown) => void;
+  formRefUserDefined?: React.RefObject<FormInstance<any> | null>;
 }
 const BasicStepForm: React.FC<BasicStepFormProps> = ({
   children,
@@ -24,6 +25,7 @@ const BasicStepForm: React.FC<BasicStepFormProps> = ({
   APIURL,
   finalStep = false,
   onFinishCustomize,
+  formRefUserDefined,
 }) => {
   const stepContext = useStepContext();
   const { readOnly, id, action } = useFormhelper();
@@ -60,7 +62,7 @@ const BasicStepForm: React.FC<BasicStepFormProps> = ({
 
   return (
     <BasicForm
-      formRef={formRef}
+      formRef={formRefUserDefined ? formRefUserDefined : formRef}
       onFinish={onFinishCustomize ? onFinishCustomize : OnStepFinish}
       readOnly={loading ? loading : writeLoading ? writeLoading : readOnly}
       loading={loading}

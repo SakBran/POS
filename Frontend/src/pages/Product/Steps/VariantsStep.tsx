@@ -1,9 +1,22 @@
-import { Button, Checkbox, Col, Form, Input, Radio, Row, Space } from 'antd';
+import {
+  Button,
+  Checkbox,
+  Col,
+  Form,
+  FormInstance,
+  Input,
+  Radio,
+  Row,
+  Space,
+} from 'antd';
 import BasicStepForm from '../../../components/My Components/StepForm/BasicStepForm';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CodeOutlined } from '@ant-design/icons';
 import Swal from 'sweetalert2';
 import VariantEditor, { Variant, VariantGroup } from './EditableList';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import axiosInstance from '../../../services/AxiosInstance';
 
 type StepProps = {
   current: number;
@@ -25,13 +38,60 @@ const defaultData: VariantsStepDto = {
   variants: [],
 };
 
+const onLoadDataFetch = async (
+  productId: string,
+  setData: React.Dispatch<React.SetStateAction<VariantsStepDto>>
+) => {
+  const url = `Product/GetProductWithVariants/${productId}`;
+  try {
+    const resp = await axiosInstance.get(url);
+    const productData: VariantsStepDto = await resp.data;
+    setData(productData);
+  } catch (ex) {
+    console.log(ex);
+  }
+};
+
+const handleAddRequest = async (
+  productId: string,
+  data: VariantsStepDto,
+  setData: React.Dispatch<React.SetStateAction<VariantsStepDto>>
+) => {
+  const url = `Product/Variants/${productId}`;
+  try {
+    const resp = await axiosInstance.put(url, data);
+    const productData: VariantsStepDto = await resp.data;
+    setData(productData);
+  } catch (ex) {
+    console.log(ex);
+  }
+};
+
 const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id) {
+      onLoadDataFetch(id, setData);
+      formRef.current?.setFieldValue('hasVariants', data.hasVariants);
+    }
+  }, [id]);
+
   const [options, setOptions] = useState(['Colour', 'Size']);
   const [selected, setSelected] = useState<string[]>([]);
+  const formRef = React.useRef<FormInstance>(null);
   const [data, setData] = useState<VariantsStepDto>(defaultData);
+  useEffect(() => {
+    if (data.variantInputs) {
+      const keys = Object.keys(data.variantInputs);
+      setSelected(keys);
+    }
+  }, [data]);
+
   const setVariants = (value: VariantGroup[]) => {
     setData((prev) => ({ ...prev, variants: value }));
   };
+
   const [newOption, setNewOption] = useState('');
 
   const handleAdd = () => {
@@ -140,6 +200,9 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
   const onFinish = (values: unknown) => {
     console.log(values);
     console.log(JSON.stringify(data));
+    if (id) {
+      handleAddRequest(id, data, setData);
+    }
   };
 
   return (
@@ -147,14 +210,12 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
       onFinishCustomize={onFinish}
       current={current}
       setCurrent={setCurrent}
+      formRefUserDefined={formRef}
       APIURL="Product"
     >
-      <Form.Item
-        label="Has Variants"
-        name="HasVariants"
-        initialValue={data.hasVariants}
-      >
+      <Form.Item label="Has Variants">
         <Radio.Group
+          value={data.hasVariants}
           onChange={(e) =>
             setData((prev) => ({ ...prev, hasVariants: e.target.value }))
           }
@@ -168,7 +229,7 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
       {/* 🔸 show this block only if Yes is selected */}
       {data.hasVariants && (
         <div>
-          <Form.Item label="Variants" name="variants">
+          <Form.Item label="Variants">
             <Checkbox.Group
               value={selected}
               onChange={(vals) => setSelected(vals as string[])}
@@ -179,7 +240,7 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
                     <Checkbox value={item}>{item}</Checkbox>
 
                     {selected.includes(item) && (
-                      <Form.Item name={item + 'Values'}>
+                      <Form.Item>
                         <Input
                           placeholder={`Enter value for ${item}`}
                           value={data.variantInputs[item] || ''}
