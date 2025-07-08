@@ -40,6 +40,25 @@ export const AjaxStepButton = ({
             </Button>{' '}
           </>
         )}
+
+        {finalStep && (
+          <>
+            <Button type="primary" htmlType="submit">
+              {writeLoading ? (
+                <Spin
+                  // Removed tip="Loading" as it's not applicable here
+                  size="small"
+                  spinning={writeLoading}
+                  indicator={
+                    <LoadingOutlined style={{ color: 'white' }} spin />
+                  }
+                ></Spin>
+              ) : (
+                'Save'
+              )}
+            </Button>{' '}
+          </>
+        )}
       </>
     );
   return (

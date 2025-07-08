@@ -22,6 +22,7 @@ namespace API.DBContext
         public DbSet<SaleDetail> SaleDetails { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<VariantInput> VariantInputs { get; set; }
+        public DbSet<ProductUnit> ProductUnits { get; set; }
 
 
 

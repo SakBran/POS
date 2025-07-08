@@ -3,35 +3,29 @@ import { Steps, Typography } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 
 import { useStepContext } from '../../components/My Components/StepForm/StepContext';
-import UserStep2 from '../../components/My Components/StepForm/User2';
 import ProductStep from './Steps/ProductStep';
 import VariantsStep from './Steps/VariantsStep';
+import UnitStep from './Steps/UnitStep';
 
 const ProudctStepForm: React.FC = () => {
   const isMobile = useMediaQuery({ maxWidth: 769 });
   const [current, setCurrent] = useState(0);
   const steps = [
     {
-      title: 'First',
+      title: 'General',
       content: (
         <ProductStep current={current} setCurrent={setCurrent}></ProductStep>
       ),
     },
     {
-      title: 'Second',
+      title: 'Variants & Stocks',
       content: (
         <VariantsStep current={current} setCurrent={setCurrent}></VariantsStep>
       ),
     },
     {
-      title: 'Last',
-      content: (
-        <UserStep2
-          current={current}
-          setCurrent={setCurrent}
-          finalStep={true}
-        ></UserStep2>
-      ),
+      title: 'Units',
+      content: <UnitStep current={current} setCurrent={setCurrent}></UnitStep>,
     },
   ];
 

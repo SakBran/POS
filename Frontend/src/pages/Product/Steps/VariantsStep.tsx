@@ -17,6 +17,7 @@ import VariantEditor, { Variant, VariantGroup } from './EditableList';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../../../services/AxiosInstance';
+import { current } from '@reduxjs/toolkit';
 
 type StepProps = {
   current: number;
@@ -55,13 +56,16 @@ const onLoadDataFetch = async (
 const handleAddRequest = async (
   productId: string,
   data: VariantsStepDto,
-  setData: React.Dispatch<React.SetStateAction<VariantsStepDto>>
+  setData: React.Dispatch<React.SetStateAction<VariantsStepDto>>,
+  current: number,
+  setCurrent: (current: number) => void
 ) => {
   const url = `Product/Variants/${productId}`;
   try {
     const resp = await axiosInstance.put(url, data);
     const productData: VariantsStepDto = await resp.data;
     setData(productData);
+    setCurrent(current + 1); // move to next step after saving
   } catch (ex) {
     console.log(ex);
   }
@@ -199,7 +203,7 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
 
   const onFinish = (values: unknown) => {
     if (id) {
-      handleAddRequest(id, data, setData);
+      handleAddRequest(id, data, setData, current, setCurrent);
     }
   };
 

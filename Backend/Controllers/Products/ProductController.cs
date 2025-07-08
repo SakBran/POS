@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Controllers;
 using API.DBContext;
 using API.Model;
+using Backend.Controllers.Products.DTO;
 using Backend.Controllers.Products.Request;
 using Backend.Interface;
 using Backend.Model;
@@ -157,6 +158,52 @@ namespace Backend.Controllers
             return Ok(dto);
         }
 
+        [HttpPut("Units/{id}")]
+        [Authorize]
+        public async Task<IActionResult> Units(string id, ProductUnitListDTO postData)
+        {
+            var loginUserId = await _loginCredential.GetLoginUserId();
+            var product = await _context.Products.Where(x => x.Id == id && x.RootUserId == loginUserId).FirstOrDefaultAsync();
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Clear existing units
+            var existingUnits = await _context.ProductUnits.Where(x => x.ProductId == id).ToListAsync();
+            _context.ProductUnits.RemoveRange(existingUnits);
+
+            // Add new units
+            var newUnits = postData.Units.Select(unit => new ProductUnit
+            {
+                ProductId = id,
+                UnitName = unit.UnitName,
+                QuantityInBaseUnit = unit.QuantityInBaseUnit,
+                Price = unit.Price
+            });
+            await _context.ProductUnits.AddRangeAsync(newUnits);
+
+            await _context.SaveChangesAsync();
+            var dto = await GetUnitsForProduct(id);
+            return Ok(dto);
+        }
+
+        [HttpGet("GetProductWithUnits/{id}")]
+        [Authorize]
+
+        public async Task<IActionResult> GetProductWithUnits(string id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            var dto = await GetUnitsForProduct(id);
+
+            return Ok(dto);
+        }
+
+
         [HttpGet("GetProductWithVariants/{id}")]
         [Authorize]
 
@@ -221,7 +268,27 @@ namespace Backend.Controllers
         }
 
 
+        private async Task<ProductUnitListDTO> GetUnitsForProduct(string productId)
+        {
+            // 1. Fetch saved UnitInputs (e.g., Box, Dozen)
+            var inputs = await _context.ProductUnits
+                .Where(v => v.ProductId == productId)
+                .ToListAsync();
 
+            // 2. Map to ProductUnitDTO
+            var dtos = inputs.Select(v => new ProductUnitDTO
+            {
+                ProductId = v.ProductId ?? string.Empty,
+                UnitName = v.UnitName,
+                QuantityInBaseUnit = v.QuantityInBaseUnit,
+                Price = v.Price
+            }).ToList();
+            var dto = new ProductUnitListDTO
+            {
+                Units = dtos
+            };
+            return dto;
+        }
 
 
     }
