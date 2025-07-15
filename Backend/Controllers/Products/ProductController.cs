@@ -242,6 +242,7 @@ namespace Backend.Controllers
                 return NotFound();
             }
             var dto = await GetVariantsForProduct(id);
+            dto.HasVariants = product.HasVariants;
 
             return Ok(dto);
         }
