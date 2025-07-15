@@ -40,6 +40,31 @@ namespace Backend.Controllers
 
             var loginUserId = await _loginCredential.GetLoginUserId();
             var query = _context.Products.Where(x => x.RootUserId == loginUserId && x.ParentId == null);
+            //query = query.Where(x => x.HasVariants == false);
+            return await ApiResult<Product>.CreateAsync(
+                    query,
+                    pageIndex,
+                    pageSize,
+                    sortColumn,
+                    sortOrder,
+                    filterColumn,
+                    filterQuery);
+        }
+
+        [HttpGet("GetVariantProducts")]
+        [Authorize]
+        public async Task<ActionResult<ApiResult<Product>>> GetVariantProducts(
+                  int pageIndex = 0,
+                  int pageSize = 10,
+                  string? sortColumn = null,
+                  string? sortOrder = null,
+                  string? filterColumn = null,
+                  string? filterQuery = null)
+        {
+
+            var loginUserId = await _loginCredential.GetLoginUserId();
+            var query = _context.Products.Where(x => x.RootUserId == loginUserId);
+            query = query.Where(x => x.HasVariants == false);
             return await ApiResult<Product>.CreateAsync(
                     query,
                     pageIndex,
@@ -83,7 +108,6 @@ namespace Backend.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Concurrency error occurred.");
             }
-
             return Ok(obj);
         }
 
@@ -134,19 +158,22 @@ namespace Backend.Controllers
                     var existingProduct = await _context.Products.Where(x => x.Id == value.Id).FirstOrDefaultAsync();
                     if (existingProduct != null)
                     {
-                        existingProduct.Stock = value.Stock;
+                        existingProduct.Name = product.Name + " " + Variant.Title + " " + (value?.Name ?? "");
+                        existingProduct.Stock = value?.Stock ?? existingProduct.Stock;
                         existingProduct.RetailPrice = value?.Price ?? product.RetailPrice;
                         existingProduct.WholesalePrice = value?.Price ?? product.WholesalePrice;
+                        existingProduct.RootUserId = loginUserId;
                     }
                     else
                     {
                         var p = new Product();
                         p.ParentId = product.Id;
                         p.Title = Variant.Title;
-                        p.Name = value?.Name ?? "";
+                        p.Name = product.Name + " " + Variant.Title + " " + value?.Name ?? "";
                         p.RetailPrice = value?.Price ?? product.RetailPrice;
                         p.WholesalePrice = value?.Price ?? product.WholesalePrice;
                         p.Stock = value?.Stock ?? 0;
+                        p.RootUserId = loginUserId;
                         ProductListToSave.Add(p);
                     }
                 }

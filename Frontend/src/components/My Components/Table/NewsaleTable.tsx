@@ -702,7 +702,7 @@ export const NewsaleTable: React.FC<PropsType> = ({
         onCancel={() => setIsModalOpen(false)}
       >
         <BasicTable
-          api={'Product'}
+          api={'Product/GetVariantProducts'}
           displayData={
             isSmOrBelow
               ? ['id', 'name', 'retailPrice']
