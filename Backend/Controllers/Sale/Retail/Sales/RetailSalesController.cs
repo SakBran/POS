@@ -53,7 +53,7 @@ namespace Backend.Controllers.Sale.Retail.Sales
                 return Ok(await _context.Sales.FirstOrDefaultAsync(x => x.Id == id));
             }
 
-            return NotFound();
+            return Ok(null);
         }
     }
 }
