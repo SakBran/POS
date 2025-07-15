@@ -17,7 +17,6 @@ import VariantEditor, { Variant, VariantGroup } from './EditableList';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../../../services/AxiosInstance';
-import { current } from '@reduxjs/toolkit';
 
 type StepProps = {
   current: number;
@@ -29,6 +28,7 @@ interface variantInput {
 }
 
 interface VariantsStepDto {
+  productName?: string;
   hasVariants: boolean;
   variantInputs: variantInput;
   variants: VariantGroup[];
@@ -169,7 +169,7 @@ const VariantsStep: React.FC<StepProps> = ({ current, setCurrent }) => {
       if (!groupsMap[groupTitle]) groupsMap[groupTitle] = [];
 
       groupsMap[groupTitle].push({
-        name: variantName,
+        name: data.productName + ' ' + groupTitle + ' ' + variantName,
         price: 0,
         stock: 0,
       });

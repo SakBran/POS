@@ -11,6 +11,7 @@ namespace Backend.Controllers.Products.Request
         public Dictionary<string, string> VariantInputs { get; set; } = new Dictionary<string, string>();
         public List<VariantGroupDto> Variants { get; set; } = new List<VariantGroupDto>();
         public string? ProductId { get; set; }
+        public string? ProductName { get; set; }
     }
 
     public class VariantInputs

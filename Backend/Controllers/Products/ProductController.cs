@@ -158,7 +158,7 @@ namespace Backend.Controllers
                     var existingProduct = await _context.Products.Where(x => x.Id == value.Id).FirstOrDefaultAsync();
                     if (existingProduct != null)
                     {
-                        existingProduct.Name = product.Name + " " + Variant.Title + " " + (value?.Name ?? "");
+                        existingProduct.Name = value?.Name ?? "";
                         existingProduct.Stock = value?.Stock ?? existingProduct.Stock;
                         existingProduct.RetailPrice = value?.Price ?? product.RetailPrice;
                         existingProduct.WholesalePrice = value?.Price ?? product.WholesalePrice;
@@ -169,7 +169,8 @@ namespace Backend.Controllers
                         var p = new Product();
                         p.ParentId = product.Id;
                         p.Title = Variant.Title;
-                        p.Name = product.Name + " " + Variant.Title + " " + value?.Name ?? "";
+                        p.Name = value?.Name ?? "";
+                        //p.Name = product.Name + " " + Variant.Title + " " + value?.Name ?? "";
                         p.RetailPrice = value?.Price ?? product.RetailPrice;
                         p.WholesalePrice = value?.Price ?? product.WholesalePrice;
                         p.Stock = value?.Stock ?? 0;
@@ -243,6 +244,7 @@ namespace Backend.Controllers
             }
             var dto = await GetVariantsForProduct(id);
             dto.HasVariants = product.HasVariants;
+            dto.ProductName = product.Name;
 
             return Ok(dto);
         }
@@ -287,6 +289,7 @@ namespace Backend.Controllers
             var dto = new VariantDto
             {
                 ProductId = productId,
+                ProductName = "",
                 HasVariants = variantGroups.Count > 0,
                 VariantInputs = variantInputsDict,
                 Variants = variantGroups
